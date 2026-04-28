@@ -26,6 +26,9 @@ frontend/coverage/
 *.tsbuildinfo
 npm-debug.log*
 
+# Local-only helper scripts (may contain machine-specific paths or creds)
+scripts/
+
 # IDE / OS
 .idea/
 .vscode/
