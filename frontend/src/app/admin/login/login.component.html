@@ -1,0 +1,23 @@
+<div class="login-page">
+  <div class="login-card card">
+    <div class="login-logo">🎓</div>
+    <h1>Admin Login</h1>
+    <p class="muted">Sign in to the school management panel</p>
+
+    <div class="alert-error" *ngIf="error">{{ error }}</div>
+
+    <form #f="ngForm" (ngSubmit)="submit(f)" novalidate>
+      <div class="form-row">
+        <label>Username</label>
+        <input name="username" [(ngModel)]="credentials.username" required autocomplete="username" placeholder="Enter username" />
+      </div>
+      <div class="form-row">
+        <label>Password</label>
+        <input type="password" name="password" [(ngModel)]="credentials.password" required autocomplete="current-password" placeholder="Enter password" />
+      </div>
+      <button type="submit" class="btn btn-primary btn-full" [disabled]="loading">
+        {{ loading ? 'Signing in…' : 'Sign In' }}
+      </button>
+    </form>
+  </div>
+</div>

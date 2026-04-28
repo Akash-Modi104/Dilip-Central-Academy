@@ -1,0 +1,57 @@
+<div class="page-hero">
+  <div class="container">
+    <h1>Gallery</h1>
+    <p>Glimpses of life at our school — events, activities, and memories.</p>
+  </div>
+</div>
+
+<section class="section">
+  <div class="container">
+
+    <!-- Lightbox -->
+    <div class="lightbox" *ngIf="lightboxPhoto" (click)="lightboxPhoto = null">
+      <button class="lb-close" (click)="lightboxPhoto = null">✕</button>
+      <img [src]="imageUrl(lightboxPhoto.image)" [alt]="lightboxPhoto.caption" (click)="$event.stopPropagation()" />
+      <p *ngIf="lightboxPhoto.caption">{{ lightboxPhoto.caption }}</p>
+    </div>
+
+    <!-- Album photos view -->
+    <ng-container *ngIf="selectedAlbum">
+      <div class="album-header">
+        <button class="btn btn-outline" (click)="selectedAlbum = null">← All Albums</button>
+        <h2>{{ selectedAlbum.title }}</h2>
+      </div>
+      <div *ngIf="loading" class="loading">Loading photos…</div>
+      <div class="photo-grid" *ngIf="!loading">
+        <div class="photo-item" *ngFor="let p of photos" (click)="lightboxPhoto = p">
+          <img [src]="imageUrl(p.image)" [alt]="p.caption" />
+          <div class="photo-overlay" *ngIf="p.caption">{{ p.caption }}</div>
+        </div>
+        <div *ngIf="!photos.length" class="empty-state">No photos in this album yet.</div>
+      </div>
+    </ng-container>
+
+    <!-- Albums list -->
+    <ng-container *ngIf="!selectedAlbum">
+      <h2 class="section-title">Photo Albums</h2>
+      <div *ngIf="loading" class="loading">Loading albums…</div>
+      <div class="albums-grid" *ngIf="!loading && albums.length">
+        <div class="album-card card" *ngFor="let a of albums" (click)="openAlbum(a)">
+          <div class="album-cover"
+            [style.backgroundImage]="a.cover_image ? 'url(' + imageUrl(a.cover_image) + ')' : 'none'">
+            <div class="album-cover-placeholder" *ngIf="!a.cover_image">🖼️</div>
+          </div>
+          <div class="album-info">
+            <h3>{{ a.title }}</h3>
+            <p class="muted">{{ a.description }}</p>
+            <span class="photo-count">{{ a.photo_count }} photos</span>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="!loading && !albums.length" class="empty-state">
+        <p>Gallery albums coming soon!</p>
+      </div>
+    </ng-container>
+
+  </div>
+</section>

@@ -1,0 +1,77 @@
+<section class="hero">
+  <div class="hero-overlay"></div>
+  <div class="container hero-content">
+    <h1>{{ settings?.school_name || 'Welcome to Our School' }}</h1>
+    <p class="hero-sub">{{ settings?.tagline || 'Excellence in Education' }}</p>
+    <div class="hero-actions">
+      <a routerLink="/admissions" class="btn btn-accent">Apply for Admission</a>
+      <a routerLink="/about" class="btn btn-outline-white">Learn More</a>
+    </div>
+  </div>
+</section>
+
+<section class="stats-bar">
+  <div class="container stats-grid">
+    <div class="stat-item" *ngFor="let s of stats">
+      <span class="stat-icon">{{ s.icon }}</span>
+      <span class="stat-value">{{ s.value }}</span>
+      <span class="stat-label">{{ s.label }}</span>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Why Choose Us?</h2>
+    <div class="features-grid">
+      <div class="feature-card card">
+        <div class="feature-icon">📚</div>
+        <h3>Academic Excellence</h3>
+        <p>Our rigorous curriculum is designed to challenge and inspire students to achieve their full potential.</p>
+      </div>
+      <div class="feature-card card">
+        <div class="feature-icon">🌱</div>
+        <h3>Holistic Development</h3>
+        <p>We nurture students' intellectual, social, emotional, and physical growth through diverse programs.</p>
+      </div>
+      <div class="feature-card card">
+        <div class="feature-icon">🤝</div>
+        <h3>Community Focus</h3>
+        <p>Strong parent-teacher partnerships and community engagement are at the heart of our school culture.</p>
+      </div>
+      <div class="feature-card card">
+        <div class="feature-icon">💻</div>
+        <h3>Modern Facilities</h3>
+        <p>State-of-the-art labs, libraries, and sports facilities provide the best learning environment.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section bg-light" *ngIf="latestNews.length">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">Latest News</h2>
+      <a routerLink="/news" class="btn btn-outline">View All</a>
+    </div>
+    <div class="news-grid">
+      <div class="news-card card" *ngFor="let n of latestNews">
+        <img [src]="thumbnailUrl(n.thumbnail)" [alt]="n.title" class="news-thumb" />
+        <div class="news-body">
+          <span class="news-cat">{{ n.category }}</span>
+          <h3>{{ n.title }}</h3>
+          <p class="muted">{{ n.summary }}</p>
+          <a [routerLink]="['/news', n.slug]" class="read-more">Read more →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-section">
+  <div class="container cta-inner">
+    <h2>Ready to Join {{ settings?.school_name }}?</h2>
+    <p>Give your child the best start in life. Admissions are now open.</p>
+    <a routerLink="/admissions" class="btn btn-accent">Start Admission Process</a>
+  </div>
+</section>

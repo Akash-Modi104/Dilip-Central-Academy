@@ -1,0 +1,57 @@
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; h1 { margin: 0; } }
+
+.table-wrap { overflow-x: auto; }
+
+.badge {
+  background: var(--color-accent);
+  color: #1f2937;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.status-dot {
+  font-size: 0.85rem;
+  color: var(--color-muted);
+  &.published { color: #15803d; font-weight: 600; }
+}
+
+.actions { display: flex; gap: 0.5rem; }
+
+.btn-sm {
+  padding: 0.3rem 0.7rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--color-primary);
+  background: transparent;
+  color: var(--color-primary);
+  text-decoration: none;
+  display: inline-block;
+  &:hover { background: var(--color-primary); color: #fff; text-decoration: none; }
+  &.danger { border-color: #dc2626; color: #dc2626; &:hover { background: #dc2626; color: #fff; } }
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.5);
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal {
+  max-width: 400px;
+  width: 90%;
+  h3 { margin: 0 0 0.5rem; }
+  p { color: var(--color-muted); margin: 0 0 1.5rem; }
+}
+
+.modal-actions { display: flex; gap: 0.75rem; justify-content: flex-end; }
+.btn-danger { background: #dc2626; color: #fff; border: none; padding: 0.6rem 1.2rem; border-radius: 6px; cursor: pointer; font-weight: 600; }
+
+.loading, .empty-state { padding: 2rem; text-align: center; color: var(--color-muted); }

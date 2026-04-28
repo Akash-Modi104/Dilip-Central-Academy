@@ -1,0 +1,39 @@
+<div class="admin-shell" [class.sidebar-collapsed]="!sidebarOpen">
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-icon">🎓</span>
+      <span class="brand-text">Admin Panel</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a *ngFor="let n of visibleNav"
+        [routerLink]="n.route"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{exact: n.route === '/admin'}"
+        class="nav-item">
+        <span class="nav-icon">{{ n.icon }}</span>
+        <span class="nav-label">{{ n.label }}</span>
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <a routerLink="/" target="_blank" class="nav-item view-site">
+        <span class="nav-icon">🌐</span>
+        <span class="nav-label">View Site</span>
+      </a>
+    </div>
+  </aside>
+
+  <div class="main-area">
+    <header class="admin-header">
+      <button class="toggle-btn" (click)="sidebarOpen = !sidebarOpen">☰</button>
+      <div class="header-right">
+        <span class="user-name">{{ auth.currentUser?.first_name || auth.currentUser?.username }}</span>
+        <button class="btn btn-outline logout-btn" (click)="logout()">Sign Out</button>
+      </div>
+    </header>
+    <main class="admin-content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+
+</div>

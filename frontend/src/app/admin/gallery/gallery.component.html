@@ -1,0 +1,104 @@
+<div class="page-header">
+  <h1>Gallery Management</h1>
+  <button class="btn btn-primary" (click)="showAlbumForm = !showAlbumForm" *ngIf="!selectedAlbum">+ New Album</button>
+  <button class="btn btn-outline" (click)="selectedAlbum = null" *ngIf="selectedAlbum">← All Albums</button>
+</div>
+
+<!-- Create album form -->
+<div class="card album-form" *ngIf="showAlbumForm && !selectedAlbum">
+  <h3>Create Album</h3>
+  <form #af="ngForm" (ngSubmit)="saveAlbum(af)" novalidate>
+    <div class="form-row">
+      <label>Album Title *</label>
+      <input name="title" [(ngModel)]="newAlbum.title" required placeholder="e.g. Annual Sports Day 2024" />
+    </div>
+    <div class="form-row">
+      <label>Description</label>
+      <textarea name="description" [(ngModel)]="newAlbum.description" rows="2"></textarea>
+    </div>
+    <div class="form-actions">
+      <button type="button" class="btn btn-outline" (click)="showAlbumForm = false">Cancel</button>
+      <button type="submit" class="btn btn-primary" [disabled]="savingAlbum">{{ savingAlbum ? 'Creating…' : 'Create Album' }}</button>
+    </div>
+  </form>
+</div>
+
+<!-- Albums list -->
+<ng-container *ngIf="!selectedAlbum">
+  <div *ngIf="loadingAlbums" class="loading">Loading albums…</div>
+  <div class="albums-grid" *ngIf="!loadingAlbums">
+    <div class="album-card card" *ngFor="let a of albums">
+      <div class="album-cover" [style.backgroundImage]="a.cover_image ? 'url(' + imageUrl(a.cover_image) + ')' : 'none'">
+        <span *ngIf="!a.cover_image">🖼️</span>
+      </div>
+      <div class="album-info">
+        <h3>{{ a.title }}</h3>
+        <p class="muted">{{ a.photo_count }} photos</p>
+        <div class="album-actions">
+          <button class="btn-sm" (click)="openAlbum(a)">Open</button>
+          <button class="btn-sm danger" (click)="confirmDeleteAlbum(a.id)">Delete</button>
+        </div>
+      </div>
+    </div>
+    <p *ngIf="!albums.length" class="empty-state">No albums yet. Create one above!</p>
+  </div>
+</ng-container>
+
+<!-- Album photos -->
+<ng-container *ngIf="selectedAlbum">
+  <h2 class="album-title">{{ selectedAlbum.title }}</h2>
+
+  <div class="card upload-section">
+    <h3>Upload Photos</h3>
+    <div class="upload-controls">
+      <div class="form-row">
+        <label>Select Images</label>
+        <input type="file" accept="image/*" multiple (change)="onFilesChange($event)" />
+      </div>
+      <div class="form-row">
+        <label>Caption (optional)</label>
+        <input [(ngModel)]="uploadCaption" placeholder="Caption for all selected photos" />
+      </div>
+    </div>
+    <div class="alert-error" *ngIf="uploadError">{{ uploadError }}</div>
+    <button class="btn btn-primary" (click)="uploadPhotos()" [disabled]="!uploadFiles.length || uploading">
+      {{ uploading ? 'Uploading…' : 'Upload ' + uploadFiles.length + ' Photo(s)' }}
+    </button>
+  </div>
+
+  <div *ngIf="loadingPhotos" class="loading">Loading photos…</div>
+
+  <div class="photo-grid" *ngIf="!loadingPhotos">
+    <div class="photo-item" *ngFor="let p of photos">
+      <img [src]="imageUrl(p.image)" [alt]="p.caption" />
+      <div class="photo-footer">
+        <span class="caption">{{ p.caption || 'No caption' }}</span>
+        <button class="btn-sm danger" (click)="confirmDeletePhoto(p.id)">✕</button>
+      </div>
+    </div>
+    <p *ngIf="!photos.length" class="empty-state">No photos in this album yet.</p>
+  </div>
+</ng-container>
+
+<!-- Delete modals -->
+<div class="modal-backdrop" *ngIf="deletePhotoId" (click)="deletePhotoId = null">
+  <div class="modal card" (click)="$event.stopPropagation()">
+    <h3>Delete Photo?</h3>
+    <p>This cannot be undone.</p>
+    <div class="modal-actions">
+      <button class="btn btn-outline" (click)="deletePhotoId = null">Cancel</button>
+      <button class="btn btn-danger" (click)="deletePhoto()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" *ngIf="deleteAlbumId" (click)="deleteAlbumId = null">
+  <div class="modal card" (click)="$event.stopPropagation()">
+    <h3>Delete Album?</h3>
+    <p>All photos in this album will also be deleted.</p>
+    <div class="modal-actions">
+      <button class="btn btn-outline" (click)="deleteAlbumId = null">Cancel</button>
+      <button class="btn btn-danger" (click)="deleteAlbum()">Delete Album</button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,38 @@
+<div class="page-header">
+  <h1>Dashboard</h1>
+  <p class="muted">Welcome back, {{ auth.currentUser?.first_name || auth.currentUser?.username }}!</p>
+</div>
+
+<div *ngIf="loading" class="loading">Loading stats…</div>
+
+<div class="stats-grid" *ngIf="!loading && stats">
+  <div class="stat-card" *ngFor="let c of cards" [style.borderTopColor]="c.color">
+    <div class="stat-icon" [style.color]="c.color">{{ c.icon }}</div>
+    <div class="stat-body">
+      <div class="stat-value">{{ c.value }}</div>
+      <div class="stat-label">{{ c.label }}</div>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="!loading && !stats" class="empty-state">
+  <p>Stats unavailable. Make sure the backend is running.</p>
+</div>
+
+<div class="quick-links" *ngIf="!loading">
+  <h2>Quick Actions</h2>
+  <div class="quick-grid">
+    <a routerLink="/admin/news" class="quick-card card">
+      <span>📰</span><span>Manage News</span>
+    </a>
+    <a routerLink="/admin/gallery" class="quick-card card">
+      <span>🖼️</span><span>Manage Gallery</span>
+    </a>
+    <a routerLink="/admin/admissions" class="quick-card card">
+      <span>📋</span><span>View Admissions</span>
+    </a>
+    <a routerLink="/admin/settings" class="quick-card card">
+      <span>⚙️</span><span>Site Settings</span>
+    </a>
+  </div>
+</div>

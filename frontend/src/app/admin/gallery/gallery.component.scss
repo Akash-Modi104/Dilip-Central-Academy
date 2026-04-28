@@ -1,0 +1,78 @@
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; h1 { margin: 0; } }
+
+.album-form {
+  max-width: 500px;
+  margin-bottom: 1.5rem;
+  h3 { margin: 0 0 1rem; }
+}
+
+.form-actions { display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 0.5rem; }
+
+.albums-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.25rem;
+}
+
+.album-card { overflow: hidden; padding: 0; }
+.album-cover {
+  height: 140px;
+  background: #e8eaf6 center/cover no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+}
+.album-info { padding: 0.75rem; h3 { margin: 0 0 0.25rem; font-size: 0.95rem; } p { margin: 0 0 0.75rem; font-size: 0.8rem; } }
+.album-actions { display: flex; gap: 0.5rem; }
+.album-title { font-size: 1.5rem; margin: 0 0 1rem; }
+
+.upload-section {
+  margin-bottom: 1.5rem;
+  h3 { margin: 0 0 1rem; }
+  .upload-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 0 1rem; }
+}
+
+.alert-error { background: #fef2f2; color: #b91c1c; padding: 0.6rem 0.75rem; border-radius: 6px; margin-bottom: 0.75rem; font-size: 0.875rem; }
+
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.photo-item {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  background: #f8fafc;
+  img { width: 100%; height: 130px; object-fit: cover; display: block; }
+}
+
+.photo-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.4rem 0.6rem;
+}
+
+.caption { font-size: 0.75rem; color: var(--color-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.btn-sm {
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--color-primary);
+  background: transparent;
+  color: var(--color-primary);
+  &.danger { border-color: #dc2626; color: #dc2626; &:hover { background: #dc2626; color: #fff; } }
+}
+
+.modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 500; display: flex; align-items: center; justify-content: center; }
+.modal { max-width: 400px; width: 90%; h3 { margin: 0 0 0.5rem; } p { color: var(--color-muted); margin: 0 0 1.5rem; } }
+.modal-actions { display: flex; gap: 0.75rem; justify-content: flex-end; }
+.btn-danger { background: #dc2626; color: #fff; border: none; padding: 0.6rem 1.2rem; border-radius: 6px; cursor: pointer; font-weight: 600; }
+
+.loading, .empty-state { padding: 2rem; text-align: center; color: var(--color-muted); }

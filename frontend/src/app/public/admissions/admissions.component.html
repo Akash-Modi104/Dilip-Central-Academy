@@ -1,0 +1,79 @@
+<div class="page-hero">
+  <div class="container">
+    <h1>Admissions</h1>
+    <p>Join our school community. Admissions are open for the upcoming academic year.</p>
+  </div>
+</div>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Admission Process</h2>
+    <div class="steps-list">
+      <div class="step" *ngFor="let s of steps">
+        <div class="step-num">{{ s.num }}</div>
+        <div>
+          <h3>{{ s.title }}</h3>
+          <p class="muted">{{ s.desc }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section bg-light">
+  <div class="container form-section">
+    <div class="form-info">
+      <h2>Admission Inquiry</h2>
+      <p>Fill out this form and our admissions team will get in touch with you within 2 working days.</p>
+      <ul class="checklist">
+        <li>✅ Free inquiry — no obligations</li>
+        <li>✅ Quick response within 48 hours</li>
+        <li>✅ Counselling session available</li>
+        <li>✅ Merit-based scholarships available</li>
+      </ul>
+    </div>
+
+    <div class="form-card card" *ngIf="!submitted">
+      <h3>Inquiry Form</h3>
+      <div class="alert-error" *ngIf="error">{{ error }}</div>
+      <form #f="ngForm" (ngSubmit)="submit(f)" novalidate>
+        <div class="form-row">
+          <label>Student Name *</label>
+          <input name="student_name" [(ngModel)]="model.student_name" required placeholder="Full name of student" />
+        </div>
+        <div class="form-row">
+          <label>Grade Applying For *</label>
+          <select name="grade_applying" [(ngModel)]="model.grade_applying" required>
+            <option value="">Select grade</option>
+            <option *ngFor="let g of grades" [value]="g">{{ g }}</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>Parent / Guardian Name *</label>
+          <input name="parent_name" [(ngModel)]="model.parent_name" required placeholder="Your name" />
+        </div>
+        <div class="form-row">
+          <label>Phone *</label>
+          <input name="phone" [(ngModel)]="model.phone" required placeholder="+91 98765 43210" />
+        </div>
+        <div class="form-row">
+          <label>Email</label>
+          <input type="email" name="email" [(ngModel)]="model.email" placeholder="your@email.com" />
+        </div>
+        <div class="form-row">
+          <label>Message</label>
+          <textarea name="message" [(ngModel)]="model.message" rows="3" placeholder="Any additional information…"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full" [disabled]="submitting">
+          {{ submitting ? 'Submitting…' : 'Submit Inquiry' }}
+        </button>
+      </form>
+    </div>
+
+    <div class="success-card card" *ngIf="submitted">
+      <div class="success-icon">🎉</div>
+      <h3>Thank You!</h3>
+      <p>Your inquiry has been submitted successfully. Our admissions team will contact you within 2 working days.</p>
+    </div>
+  </div>
+</section>
