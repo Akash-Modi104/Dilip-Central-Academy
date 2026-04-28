@@ -1,0 +1,69 @@
+<div class="page-header">
+  <h1>Admissions</h1>
+  <div class="filter-bar">
+    <select [(ngModel)]="filterStatus" (change)="load()">
+      <option value="">All Status</option>
+      <option *ngFor="let s of statuses" [value]="s">{{ s | titlecase }}</option>
+    </select>
+  </div>
+</div>
+
+<div *ngIf="loading" class="loading">Loading inquiries…</div>
+
+<div class="table-wrap card" *ngIf="!loading">
+  <table *ngIf="inquiries.length; else empty">
+    <thead>
+      <tr>
+        <th>Student</th>
+        <th>Grade</th>
+        <th>Parent</th>
+        <th>Phone</th>
+        <th>Status</th>
+        <th>Received</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let i of inquiries">
+        <td>{{ i.student_name }}</td>
+        <td>{{ i.grade_applying }}</td>
+        <td>{{ i.parent_name }}</td>
+        <td>{{ i.phone }}</td>
+        <td>
+          <span class="status-badge" [ngClass]="statusClass(i.status)">{{ i.status | titlecase }}</span>
+        </td>
+        <td>{{ i.created_at | date:'mediumDate' }}</td>
+        <td>
+          <button class="btn-sm" (click)="selectedInquiry = i">View</button>
+          <select class="status-select" [ngModel]="i.status" (ngModelChange)="updateStatus(i, $event)">
+            <option *ngFor="let s of statuses" [value]="s">{{ s | titlecase }}</option>
+          </select>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <ng-template #empty><p class="empty-state">No inquiries found.</p></ng-template>
+</div>
+
+<!-- Detail drawer -->
+<div class="detail-backdrop" *ngIf="selectedInquiry" (click)="selectedInquiry = null">
+  <div class="detail-panel card" (click)="$event.stopPropagation()">
+    <button class="close-btn" (click)="selectedInquiry = null">✕</button>
+    <h2>Inquiry Detail</h2>
+    <div class="detail-row"><strong>Student:</strong> {{ selectedInquiry.student_name }}</div>
+    <div class="detail-row"><strong>Grade:</strong> {{ selectedInquiry.grade_applying }}</div>
+    <div class="detail-row"><strong>Parent:</strong> {{ selectedInquiry.parent_name }}</div>
+    <div class="detail-row"><strong>Phone:</strong> {{ selectedInquiry.phone }}</div>
+    <div class="detail-row"><strong>Email:</strong> {{ selectedInquiry.email }}</div>
+    <div class="detail-row"><strong>Status:</strong> <span class="status-badge" [ngClass]="statusClass(selectedInquiry.status)">{{ selectedInquiry.status | titlecase }}</span></div>
+    <div class="detail-row" *ngIf="selectedInquiry.message"><strong>Message:</strong><p>{{ selectedInquiry.message }}</p></div>
+    <div class="detail-row"><strong>Received:</strong> {{ selectedInquiry.created_at | date:'medium' }}</div>
+    <div class="status-actions">
+      <strong>Change Status:</strong>
+      <div class="status-btns">
+        <button *ngFor="let s of statuses" class="btn-sm" [class.active]="selectedInquiry.status === s"
+          (click)="updateStatus(selectedInquiry, s)">{{ s | titlecase }}</button>
+      </div>
+    </div>
+  </div>
+</div>

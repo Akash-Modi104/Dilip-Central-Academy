@@ -1,0 +1,52 @@
+<div class="page-hero">
+  <div class="container">
+    <h1>News & Announcements</h1>
+    <p>Stay up to date with the latest happenings at our school.</p>
+  </div>
+</div>
+
+<!-- Article detail view -->
+<section class="section" *ngIf="selected">
+  <div class="container article-wrap">
+    <button class="btn btn-outline back-btn" (click)="selected = null">← Back to News</button>
+    <img *ngIf="selected.thumbnail" [src]="thumbnailUrl(selected.thumbnail)" [alt]="selected.title" class="article-hero-img" />
+    <div class="article-meta">
+      <span class="cat-badge">{{ selected.category }}</span>
+      <span class="muted">{{ selected.published_at | date:'mediumDate' }}</span>
+    </div>
+    <h1 class="article-title">{{ selected.title }}</h1>
+    <div class="article-body" [innerHTML]="selected.content"></div>
+  </div>
+</section>
+
+<!-- News list view -->
+<section class="section" *ngIf="!selected">
+  <div class="container">
+    <div class="filter-bar" *ngIf="categories.length">
+      <button class="filter-btn" [class.active]="activeCategory === ''" (click)="filterBy('')">All</button>
+      <button class="filter-btn" *ngFor="let c of categories" [class.active]="activeCategory === c" (click)="filterBy(c)">{{ c }}</button>
+    </div>
+
+    <div *ngIf="loading" class="loading">Loading news…</div>
+
+    <div class="news-grid" *ngIf="!loading && news.length">
+      <div class="news-card card" *ngFor="let n of news" (click)="loadArticle(n.slug)" style="cursor:pointer">
+        <img *ngIf="n.thumbnail" [src]="thumbnailUrl(n.thumbnail)" [alt]="n.title" class="news-thumb" />
+        <div class="no-thumb" *ngIf="!n.thumbnail">📰</div>
+        <div class="news-body">
+          <div class="news-meta">
+            <span class="cat-badge">{{ n.category }}</span>
+            <span class="muted date">{{ n.published_at | date:'mediumDate' }}</span>
+          </div>
+          <h3>{{ n.title }}</h3>
+          <p class="muted">{{ n.summary }}</p>
+          <span class="read-more">Read more →</span>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="!loading && !news.length" class="empty-state">
+      <p>No news articles yet. Check back soon!</p>
+    </div>
+  </div>
+</section>

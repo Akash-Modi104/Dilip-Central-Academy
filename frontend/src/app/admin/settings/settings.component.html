@@ -1,0 +1,114 @@
+<div class="page-header">
+  <h1>Site Settings</h1>
+  <p class="muted">Manage your school's public-facing information and branding.</p>
+</div>
+
+<div *ngIf="loading" class="loading">Loading settings…</div>
+
+<form #f="ngForm" (ngSubmit)="save(f)" novalidate *ngIf="!loading">
+
+  <div class="alert-success" *ngIf="saved">✅ Settings saved successfully!</div>
+  <div class="alert-error" *ngIf="error">{{ error }}</div>
+
+  <div class="settings-grid">
+
+    <section class="settings-section card">
+      <h2>School Identity</h2>
+      <div class="form-row">
+        <label>School Name *</label>
+        <input name="school_name" [(ngModel)]="model.school_name" required />
+      </div>
+      <div class="form-row">
+        <label>Tagline</label>
+        <input name="tagline" [(ngModel)]="model.tagline" />
+      </div>
+      <div class="form-row">
+        <label>Founded Year</label>
+        <input type="number" name="founded_year" [(ngModel)]="model.founded_year" />
+      </div>
+      <div class="form-row">
+        <label>Logo</label>
+        <img *ngIf="logoUrl()" [src]="logoUrl()" class="logo-preview" alt="Current logo" />
+        <input type="file" accept="image/*" (change)="onLogoChange($event)" />
+      </div>
+      <div class="form-row">
+        <label>Favicon</label>
+        <input type="file" accept="image/*" (change)="onFaviconChange($event)" />
+      </div>
+    </section>
+
+    <section class="settings-section card">
+      <h2>Theme Colors</h2>
+      <div class="form-row color-row">
+        <label>Primary Color</label>
+        <div class="color-input-wrap">
+          <input type="color" name="primary_color" [(ngModel)]="model.primary_color" />
+          <input name="primary_color_hex" [(ngModel)]="model.primary_color" placeholder="#0d47a1" />
+        </div>
+      </div>
+      <div class="form-row color-row">
+        <label>Accent Color</label>
+        <div class="color-input-wrap">
+          <input type="color" name="accent_color" [(ngModel)]="model.accent_color" />
+          <input name="accent_color_hex" [(ngModel)]="model.accent_color" placeholder="#ffb300" />
+        </div>
+      </div>
+    </section>
+
+    <section class="settings-section card">
+      <h2>Contact Information</h2>
+      <div class="form-row">
+        <label>Address</label>
+        <textarea name="address" [(ngModel)]="model.address" rows="2"></textarea>
+      </div>
+      <div class="form-row">
+        <label>Phone</label>
+        <input name="phone" [(ngModel)]="model.phone" />
+      </div>
+      <div class="form-row">
+        <label>Email</label>
+        <input type="email" name="email" [(ngModel)]="model.email" />
+      </div>
+      <div class="form-row">
+        <label>Office Hours</label>
+        <input name="office_hours" [(ngModel)]="model.office_hours" placeholder="Mon–Fri, 8am–4pm" />
+      </div>
+      <div class="form-row">
+        <label>Map Embed URL</label>
+        <input name="map_embed_url" [(ngModel)]="model.map_embed_url" placeholder="Google Maps embed URL" />
+      </div>
+    </section>
+
+    <section class="settings-section card">
+      <h2>Social Media</h2>
+      <div class="form-row">
+        <label>Facebook URL</label>
+        <input name="facebook_url" [(ngModel)]="model.facebook_url" />
+      </div>
+      <div class="form-row">
+        <label>Instagram URL</label>
+        <input name="instagram_url" [(ngModel)]="model.instagram_url" />
+      </div>
+      <div class="form-row">
+        <label>YouTube URL</label>
+        <input name="youtube_url" [(ngModel)]="model.youtube_url" />
+      </div>
+      <div class="form-row">
+        <label>Twitter / X URL</label>
+        <input name="twitter_url" [(ngModel)]="model.twitter_url" />
+      </div>
+      <div class="form-row">
+        <label>LinkedIn URL</label>
+        <input name="linkedin_url" [(ngModel)]="model.linkedin_url" />
+      </div>
+    </section>
+
+  </div>
+
+  <div class="save-bar">
+    <button type="submit" class="btn btn-primary" [disabled]="saving">
+      {{ saving ? 'Saving…' : 'Save Settings' }}
+    </button>
+  </div>
+
+</form>

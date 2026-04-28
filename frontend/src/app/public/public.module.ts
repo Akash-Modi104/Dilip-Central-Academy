@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Routes } from '@angular/router';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { PublicLayoutComponent } from './layout/public-layout.component';
 import { HomeComponent } from './home/home.component';
@@ -20,6 +20,7 @@ const routes: Routes = [
       { path: 'academics', component: AcademicsComponent },
       { path: 'admissions', component: AdmissionsComponent },
       { path: 'news', component: NewsComponent },
+      { path: 'news/:slug', component: NewsComponent },
       { path: 'gallery', component: GalleryComponent },
       { path: 'contact', component: ContactComponent },
     ],
@@ -31,6 +32,6 @@ const routes: Routes = [
     PublicLayoutComponent, HomeComponent, AboutComponent, AcademicsComponent,
     AdmissionsComponent, NewsComponent, GalleryComponent, ContactComponent,
   ],
-  imports: [CommonModule, FormsModule, RouterModule.forChild(routes)],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule.forChild(routes)],
 })
 export class PublicModule {}

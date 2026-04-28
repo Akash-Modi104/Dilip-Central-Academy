@@ -1,0 +1,112 @@
+$sidebar-w: 240px;
+$sidebar-collapsed-w: 64px;
+
+.admin-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: $sidebar-w;
+  min-height: 100vh;
+  background: #1a1a2e;
+  color: #ccc;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 200;
+  transition: width .2s;
+  overflow: hidden;
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.25rem 1rem;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+
+.brand-icon { font-size: 1.75rem; }
+.brand-text { font-weight: 700; color: #fff; font-size: 1rem; white-space: nowrap; }
+
+.sidebar-nav { flex: 1; padding: 1rem 0; }
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 1rem;
+  color: #adb5bd;
+  text-decoration: none;
+  border-left: 3px solid transparent;
+  transition: .2s;
+  white-space: nowrap;
+
+  &:hover, &.active {
+    background: rgba(255,255,255,.08);
+    color: #fff;
+    text-decoration: none;
+  }
+
+  &.active { border-left-color: var(--color-accent); }
+}
+
+.nav-icon { font-size: 1.2rem; min-width: 1.5rem; text-align: center; }
+.nav-label { font-size: 0.9rem; }
+
+.sidebar-footer {
+  border-top: 1px solid rgba(255,255,255,.08);
+  padding: 0.5rem 0;
+  .view-site { color: #adb5bd; }
+}
+
+.main-area {
+  flex: 1;
+  margin-left: $sidebar-w;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  transition: margin-left .2s;
+}
+
+.admin-header {
+  background: #fff;
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.toggle-btn {
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  cursor: pointer;
+  color: var(--color-text);
+  padding: 0.25rem;
+}
+
+.header-right { display: flex; align-items: center; gap: 1rem; }
+.user-name { font-weight: 600; }
+.logout-btn { padding: 0.4rem 0.8rem; font-size: 0.85rem; }
+
+.admin-content { padding: 1.5rem; flex: 1; }
+
+.admin-shell.sidebar-collapsed {
+  .sidebar { width: $sidebar-collapsed-w; }
+  .brand-text, .nav-label { display: none; }
+  .main-area { margin-left: $sidebar-collapsed-w; }
+}
+
+@media (max-width: 768px) {
+  .sidebar { width: $sidebar-collapsed-w; }
+  .brand-text, .nav-label { display: none; }
+  .main-area { margin-left: $sidebar-collapsed-w; }
+}

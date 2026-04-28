@@ -1,0 +1,86 @@
+<div class="page-header">
+  <h1>Navigation Links</h1>
+  <button class="btn btn-primary" (click)="showForm = !showForm; editingId = null; newLink = { label: '', url: '', order: 0, is_active: true, open_in_new_tab: false }">
+    + Add Link
+  </button>
+</div>
+
+<p class="muted">These links appear in the site header. If no links are active, the default navigation is shown.</p>
+
+<div class="card form-card" *ngIf="showForm">
+  <h3>{{ editingId ? 'Edit Link' : 'New Link' }}</h3>
+  <form #f="ngForm" (ngSubmit)="save(f)" novalidate>
+    <div class="form-grid">
+      <div class="form-row">
+        <label>Label *</label>
+        <input name="label" [(ngModel)]="newLink.label" required placeholder="e.g. About Us" />
+      </div>
+      <div class="form-row">
+        <label>URL *</label>
+        <input name="url" [(ngModel)]="newLink.url" required placeholder="/about or https://..." />
+      </div>
+      <div class="form-row">
+        <label>Order</label>
+        <input type="number" name="order" [(ngModel)]="newLink.order" />
+      </div>
+      <div class="form-row checkboxes">
+        <label class="checkbox-label">
+          <input type="checkbox" name="is_active" [(ngModel)]="newLink.is_active" />
+          Active
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" name="open_in_new_tab" [(ngModel)]="newLink.open_in_new_tab" />
+          Open in new tab
+        </label>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button type="button" class="btn btn-outline" (click)="cancelForm()">Cancel</button>
+      <button type="submit" class="btn btn-primary" [disabled]="saving">{{ saving ? 'Saving…' : (editingId ? 'Update' : 'Add Link') }}</button>
+    </div>
+  </form>
+</div>
+
+<div *ngIf="loading" class="loading">Loading…</div>
+
+<div class="table-wrap card" *ngIf="!loading">
+  <table *ngIf="links.length; else empty">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Label</th>
+        <th>URL</th>
+        <th>Active</th>
+        <th>New Tab</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let l of links">
+        <td>{{ l.order }}</td>
+        <td>{{ l.label }}</td>
+        <td><code>{{ l.url }}</code></td>
+        <td>
+          <button class="toggle" [class.on]="l.is_active" (click)="toggleActive(l)">{{ l.is_active ? '✓' : '✗' }}</button>
+        </td>
+        <td>{{ l.open_in_new_tab ? 'Yes' : 'No' }}</td>
+        <td class="actions">
+          <button class="btn-sm" (click)="edit(l)">Edit</button>
+          <button class="btn-sm danger" (click)="confirmDelete(l.id)">Delete</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <ng-template #empty><p class="empty-state">No custom nav links. Default navigation will be shown on the site.</p></ng-template>
+</div>
+
+<div class="modal-backdrop" *ngIf="deleteId" (click)="deleteId = null">
+  <div class="modal card" (click)="$event.stopPropagation()">
+    <h3>Delete Nav Link?</h3>
+    <p>This link will be removed from the navigation.</p>
+    <div class="modal-actions">
+      <button class="btn btn-outline" (click)="deleteId = null">Cancel</button>
+      <button class="btn btn-danger" (click)="delete()">Delete</button>
+    </div>
+  </div>
+</div>

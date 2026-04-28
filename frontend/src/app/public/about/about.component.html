@@ -1,0 +1,53 @@
+<div class="page-hero">
+  <div class="container">
+    <h1>About Us</h1>
+    <p>Learn about our history, mission, and the people who make it all possible.</p>
+  </div>
+</div>
+
+<section class="section">
+  <div class="container about-grid">
+    <div class="about-text">
+      <h2>Our Story</h2>
+      <p>{{ settings?.school_name }} has been a pillar of educational excellence in our community
+        <ng-container *ngIf="settings?.founded_year"> since {{ settings?.founded_year }}</ng-container>.
+        We believe every child deserves a quality education that prepares them not just for exams,
+        but for life.</p>
+      <p>Our dedicated faculty, modern facilities, and student-centred approach have helped thousands
+        of graduates go on to successful careers and fulfilling lives.</p>
+    </div>
+    <div class="about-cards">
+      <div class="card value-card">
+        <h3>🎯 Mission</h3>
+        <p>To provide an inclusive, high-quality education that inspires curiosity, critical thinking, and a love of lifelong learning.</p>
+      </div>
+      <div class="card value-card">
+        <h3>🌟 Vision</h3>
+        <p>To be the leading institution that produces responsible, creative, and compassionate leaders for tomorrow's world.</p>
+      </div>
+      <div class="card value-card">
+        <h3>💡 Values</h3>
+        <p>Integrity, Respect, Excellence, Innovation, and Community guide everything we do.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section bg-light" *ngIf="!loading">
+  <div class="container">
+    <h2 class="section-title">Our Team</h2>
+    <div class="staff-grid" *ngIf="staff.length; else noStaff">
+      <div class="staff-card card" *ngFor="let m of staff">
+        <div class="staff-photo" [style.backgroundImage]="m.photo ? 'url(' + photoUrl(m.photo) + ')' : 'none'">
+          <span *ngIf="!m.photo" class="staff-initials">{{ m.name.charAt(0) }}</span>
+        </div>
+        <h3>{{ m.name }}</h3>
+        <p class="designation">{{ m.designation }}</p>
+        <p class="bio muted">{{ m.bio }}</p>
+      </div>
+    </div>
+    <ng-template #noStaff>
+      <p class="muted text-center">Staff information coming soon.</p>
+    </ng-template>
+  </div>
+</section>
