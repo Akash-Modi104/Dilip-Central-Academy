@@ -15,10 +15,19 @@ export class AdminLayoutComponent {
   navItems: NavItem[] = [
     { label: 'Dashboard', icon: '📊', route: '/admin' },
     { label: 'Site Settings', icon: '⚙️', route: '/admin/settings', roles: ['super_admin'] },
+    { label: 'Hero / Homepage', icon: '🏠', route: '/admin/hero', roles: ['super_admin'] },
+    { label: 'Stats Bar', icon: '📈', route: '/admin/stats', roles: ['super_admin'] },
+    { label: 'Programs', icon: '📚', route: '/admin/programs', roles: ['super_admin'] },
+    { label: 'About / Principal', icon: '🏛️', route: '/admin/about', roles: ['super_admin'] },
+    { label: 'Faculty', icon: '👩‍🏫', route: '/admin/faculty' },
+    { label: 'Testimonials', icon: '💬', route: '/admin/testimonials', roles: ['super_admin'] },
     { label: 'News', icon: '📰', route: '/admin/news' },
+    { label: 'Notices', icon: '📌', route: '/admin/notices' },
     { label: 'Gallery', icon: '🖼️', route: '/admin/gallery' },
     { label: 'Admissions', icon: '📋', route: '/admin/admissions' },
+    { label: 'Contact Inbox', icon: '📧', route: '/admin/contact-inbox' },
     { label: 'Nav Links', icon: '🔗', route: '/admin/nav-links', roles: ['super_admin'] },
+    { label: 'Users', icon: '👥', route: '/admin/users', roles: ['super_admin'] },
   ];
 
   constructor(public auth: AuthService, private router: Router) {}

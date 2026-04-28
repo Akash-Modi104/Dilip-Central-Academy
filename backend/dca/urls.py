@@ -4,10 +4,12 @@ from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework_simplejwt.views import TokenRefreshView
 from apps.users.views import CustomLoginView
+from apps.core.dashboard import dashboard_stats
 
 api_v1 = [
     path('auth/login/', CustomLoginView.as_view(), name='token_obtain_pair'),
     path('auth/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('dashboard/stats/', dashboard_stats, name='dashboard-stats'),
     path('users/', include('apps.users.urls')),
     path('site/', include('apps.core.urls')),
     path('homepage/', include('apps.homepage.urls')),

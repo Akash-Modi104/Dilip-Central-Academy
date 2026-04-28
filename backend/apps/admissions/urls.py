@@ -7,4 +7,6 @@ router.register('steps', AdmissionStepViewSet, basename='steps')
 router.register('fees', FeeRowViewSet, basename='fees')
 router.register('dates', ImportantDateViewSet, basename='dates')
 router.register('enquiries', EnquiryViewSet, basename='enquiries')
+# Frontend uses 'inquiries' spelling — register both for compatibility.
+router.register('inquiries', EnquiryViewSet, basename='inquiries')
 urlpatterns = router.urls

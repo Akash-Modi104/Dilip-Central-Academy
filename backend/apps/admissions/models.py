@@ -42,22 +42,25 @@ class ImportantDate(models.Model):
 
 
 class Enquiry(models.Model):
-    UNREAD = 'unread'
-    READ = 'read'
-    RESPONDED = 'responded'
-    STATUS = [(UNREAD, 'Unread'), (READ, 'Read'), (RESPONDED, 'Responded')]
+    PENDING = 'pending'
+    REVIEWED = 'reviewed'
+    ACCEPTED = 'accepted'
+    REJECTED = 'rejected'
+    STATUS = [(PENDING, 'Pending'), (REVIEWED, 'Reviewed'),
+              (ACCEPTED, 'Accepted'), (REJECTED, 'Rejected')]
 
-    name = models.CharField(max_length=200)
+    student_name = models.CharField(max_length=200)
+    parent_name = models.CharField(max_length=200, blank=True)
+    grade_applying = models.CharField(max_length=80, blank=True)
     email = models.EmailField()
     phone = models.CharField(max_length=40, blank=True)
-    grade = models.CharField(max_length=80, blank=True)
     message = models.TextField(blank=True)
-    submitted_at = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=12, choices=STATUS, default=UNREAD)
+    status = models.CharField(max_length=12, choices=STATUS, default=PENDING)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ['-submitted_at']
+        ordering = ['-created_at']
         verbose_name_plural = 'Enquiries'
 
     def __str__(self):
-        return f'{self.name} ({self.email})'
+        return f'{self.student_name} — {self.grade_applying} ({self.email})'

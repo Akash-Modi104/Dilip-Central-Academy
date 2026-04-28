@@ -24,4 +24,4 @@ class EnquirySerializer(serializers.ModelSerializer):
     class Meta:
         model = Enquiry
         fields = '__all__'
-        read_only_fields = ['submitted_at', 'status']
+        read_only_fields = ['created_at']
