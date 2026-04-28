@@ -1,0 +1,48 @@
+<header class="site-header">
+  <div class="container header-inner">
+    <a routerLink="/" class="brand">
+      <img *ngIf="logoUrl()" [src]="logoUrl()" alt="logo" class="logo" />
+      <div>
+        <div class="school-name">{{ settings?.school_name || 'School' }}</div>
+        <div class="tagline" *ngIf="settings?.tagline">{{ settings?.tagline }}</div>
+      </div>
+    </a>
+    <nav class="main-nav">
+      <ng-container *ngIf="navLinks.length; else defaultNavTpl">
+        <a *ngFor="let l of navLinks" [href]="l.url" [target]="l.open_in_new_tab ? '_blank' : '_self'">{{ l.label }}</a>
+      </ng-container>
+      <ng-template #defaultNavTpl>
+        <a *ngFor="let l of defaultNav" [routerLink]="l.url" routerLinkActive="active" [routerLinkActiveOptions]="{exact: l.url === '/'}">{{ l.label }}</a>
+      </ng-template>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <router-outlet></router-outlet>
+</main>
+
+<footer class="site-footer">
+  <div class="container footer-grid">
+    <div>
+      <h4>{{ settings?.school_name }}</h4>
+      <p class="muted">{{ settings?.tagline }}</p>
+      <p class="muted" *ngIf="settings?.founded_year">Established {{ settings?.founded_year }}</p>
+    </div>
+    <div>
+      <h4>Contact</h4>
+      <p>{{ settings?.address }}</p>
+      <p>{{ settings?.phone }} · {{ settings?.email }}</p>
+    </div>
+    <div>
+      <h4>Follow</h4>
+      <p>
+        <a *ngIf="settings?.facebook_url" [href]="settings?.facebook_url" target="_blank">Facebook</a>
+        <a *ngIf="settings?.instagram_url" [href]="settings?.instagram_url" target="_blank">Instagram</a>
+        <a *ngIf="settings?.youtube_url" [href]="settings?.youtube_url" target="_blank">YouTube</a>
+        <a *ngIf="settings?.twitter_url" [href]="settings?.twitter_url" target="_blank">Twitter</a>
+      </p>
+    </div>
+  </div>
+  <div class="container copyright muted">© {{ settings?.school_name }}</div>
+</footer>

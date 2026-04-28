@@ -1,0 +1,27 @@
+/* Global styles. Brand colors are CSS variables set at runtime by ThemeService. */
+:root {
+  --color-primary: #0d47a1;
+  --color-accent: #ffb300;
+  --color-text: #1f2937;
+  --color-bg: #ffffff;
+  --color-muted: #6b7280;
+  --color-border: #e5e7eb;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: var(--color-text); background: var(--color-bg); }
+a { color: var(--color-primary); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.btn { display: inline-block; padding: 0.6rem 1.2rem; border-radius: 6px; border: 0; cursor: pointer; font-weight: 600; }
+.btn-primary { background: var(--color-primary); color: #fff; }
+.btn-accent { background: var(--color-accent); color: #1f2937; }
+.btn-outline { background: transparent; color: var(--color-primary); border: 2px solid var(--color-primary); }
+.container { max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
+.card { background: #fff; border: 1px solid var(--color-border); border-radius: 8px; padding: 1.25rem; }
+input, textarea, select { padding: 0.5rem 0.75rem; border: 1px solid var(--color-border); border-radius: 6px; font: inherit; width: 100%; }
+label { display: block; font-weight: 600; margin-bottom: 0.25rem; }
+.form-row { margin-bottom: 1rem; }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 0.6rem; border-bottom: 1px solid var(--color-border); text-align: left; }
+.muted { color: var(--color-muted); }
+@media (max-width: 720px) { .container { padding: 0 0.75rem; } }
