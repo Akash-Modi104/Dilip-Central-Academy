@@ -74,7 +74,8 @@ class Command(BaseCommand):
 
     def _hero(self):
         h = Hero.load()
-        if not h.headline:
+        # Treat the default placeholder as "uncustomised".
+        if not h.subtext and (not h.headline or h.headline == 'Welcome to Our School'):
             h.headline = 'Shaping Tomorrow’s Leaders Today'
             h.subtext = ('A nurturing learning environment where students discover their '
                          'potential, build strong character, and prepare for a bright future.')
