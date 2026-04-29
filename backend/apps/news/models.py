@@ -11,8 +11,11 @@ class NewsArticle(models.Model):
     slug = models.SlugField(unique=True)
     tag = models.CharField(max_length=80, blank=True)
     image = models.ImageField(upload_to='news/', blank=True, null=True)
-    body = models.TextField(help_text='Rich-text HTML allowed')
+    summary = models.CharField(max_length=400, blank=True,
+        help_text='Short teaser shown on listing cards.')
+    body = models.TextField(blank=True, help_text='Rich-text HTML allowed')
     status = models.CharField(max_length=10, choices=STATUS, default=DRAFT)
+    is_featured = models.BooleanField(default=False)
     publish_at = models.DateTimeField(default=timezone.now)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

@@ -87,13 +87,13 @@
     <div class="news-grid">
       <a *ngFor="let n of latestNews" [routerLink]="['/news', n.slug]" class="news-card card">
         <div class="news-thumb-wrap">
-          <img *ngIf="thumbnailUrl(n.thumbnail)" [src]="thumbnailUrl(n.thumbnail)" [alt]="n.title" class="news-thumb" />
-          <div *ngIf="!thumbnailUrl(n.thumbnail)" class="news-thumb news-thumb--placeholder">📰</div>
+          <img *ngIf="imageUrl(n.image)" [src]="imageUrl(n.image)" [alt]="n.title" class="news-thumb" />
+          <div *ngIf="!imageUrl(n.image)" class="news-thumb news-thumb--placeholder">📰</div>
         </div>
         <div class="news-body">
-          <span class="news-cat" *ngIf="n.category">{{ n.category }}</span>
+          <span class="news-cat" *ngIf="n.tag">{{ n.tag }}</span>
           <h3>{{ n.title }}</h3>
-          <p class="muted">{{ n.summary }}</p>
+          <p class="muted" *ngIf="n.summary">{{ n.summary }}</p>
           <span class="read-more">Read more →</span>
         </div>
       </a>

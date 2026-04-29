@@ -5,10 +5,10 @@ interface NewsItem {
   id: number;
   title: string;
   slug: string;
-  category: string;
-  is_published: boolean;
+  tag: string;
+  status: 'draft' | 'published';
   is_featured: boolean;
-  published_at: string;
+  publish_at: string;
 }
 
 @Component({
@@ -20,6 +20,7 @@ export class NewsListComponent implements OnInit {
   news: NewsItem[] = [];
   loading = true;
   deleteId: number | null = null;
+  deleteSlug: string | null = null;
 
   constructor(private api: ApiService) {}
 
@@ -27,21 +28,22 @@ export class NewsListComponent implements OnInit {
 
   load(): void {
     this.loading = true;
-    this.api.get<{ results: NewsItem[] } | NewsItem[]>('news/?ordering=-published_at').subscribe({
+    this.api.get<{ results: NewsItem[] } | NewsItem[]>('news/articles/?ordering=-publish_at').subscribe({
       next: res => { this.news = Array.isArray(res) ? res : (res as any).results || []; this.loading = false; },
       error: () => { this.loading = false; },
     });
   }
 
-  confirmDelete(id: number): void { this.deleteId = id; }
+  confirmDelete(item: NewsItem): void { this.deleteId = item.id; this.deleteSlug = item.slug; }
 
-  cancelDelete(): void { this.deleteId = null; }
+  cancelDelete(): void { this.deleteId = null; this.deleteSlug = null; }
 
   delete(): void {
-    if (!this.deleteId) return;
-    this.api.delete(`news/${this.deleteId}/`).subscribe({
-      next: () => { this.deleteId = null; this.load(); },
-      error: () => { this.deleteId = null; },
+    if (!this.deleteSlug) return;
+    const slug = this.deleteSlug;
+    this.api.delete(`news/articles/${slug}/`).subscribe({
+      next: () => { this.cancelDelete(); this.load(); },
+      error: () => { this.cancelDelete(); },
     });
   }
 }

@@ -31,7 +31,7 @@ interface Program {
 
 interface NewsItem {
   id: number; title: string; slug: string; summary: string;
-  thumbnail: string | null; published_at: string; category: string;
+  image: string | null; publish_at: string; tag: string;
 }
 
 @Component({
@@ -90,7 +90,7 @@ export class HomeComponent implements OnInit {
       error: () => {},
     });
 
-    this.api.get<{ results: NewsItem[] } | NewsItem[]>('news/articles/?ordering=-published_at').subscribe({
+    this.api.get<{ results: NewsItem[] } | NewsItem[]>('news/articles/?ordering=-publish_at').subscribe({
       next: r => {
         const list = (Array.isArray(r) ? r : (r as any).results || []) as NewsItem[];
         this.latestNews = list.slice(0, 3);
@@ -99,7 +99,7 @@ export class HomeComponent implements OnInit {
     });
   }
 
-  thumbnailUrl(path: string | null): string {
+  imageUrl(path: string | null): string {
     return path ? this.api.mediaUrl(path) : '';
   }
 

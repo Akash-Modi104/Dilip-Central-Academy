@@ -10,23 +10,23 @@
     <thead>
       <tr>
         <th>Title</th>
-        <th>Category</th>
+        <th>Tag</th>
         <th>Status</th>
         <th>Featured</th>
-        <th>Published</th>
+        <th>Publish at</th>
         <th>Actions</th>
       </tr>
     </thead>
     <tbody>
       <tr *ngFor="let n of news">
         <td>{{ n.title }}</td>
-        <td><span class="badge">{{ n.category }}</span></td>
-        <td><span class="status-dot" [class.published]="n.is_published">{{ n.is_published ? 'Published' : 'Draft' }}</span></td>
+        <td><span class="badge" *ngIf="n.tag">{{ n.tag }}</span></td>
+        <td><span class="status-pill" [ngClass]="n.status === 'published' ? 'green' : 'gray'">{{ n.status === 'published' ? 'Published' : 'Draft' }}</span></td>
         <td>{{ n.is_featured ? '⭐' : '—' }}</td>
-        <td>{{ n.published_at | date:'mediumDate' }}</td>
+        <td>{{ n.publish_at | date:'medium' }}</td>
         <td class="actions">
-          <a [routerLink]="['/admin/news', n.id, 'edit']" class="btn-sm">Edit</a>
-          <button class="btn-sm danger" (click)="confirmDelete(n.id)">Delete</button>
+          <a [routerLink]="['/admin/news', n.slug, 'edit']" class="btn-sm">Edit</a>
+          <button class="btn-sm danger" (click)="confirmDelete(n)">Delete</button>
         </td>
       </tr>
     </tbody>

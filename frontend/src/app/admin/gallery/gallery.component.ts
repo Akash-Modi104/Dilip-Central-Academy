@@ -4,9 +4,12 @@ import { ApiService } from '../../core/api.service';
 
 interface Album {
   id: number;
-  title: string;
+  name: string;
+  slug: string;
   description: string;
   cover_image: string | null;
+  is_visible: boolean;
+  order: number;
   photo_count: number;
 }
 
@@ -29,8 +32,12 @@ export class GalleryComponent implements OnInit {
   loadingAlbums = true;
   loadingPhotos = false;
 
-  newAlbum = { title: '', description: '' };
+  newAlbum: { name: string; slug: string; description: string; is_visible: boolean; order: number } = {
+    name: '', slug: '', description: '', is_visible: true, order: 0,
+  };
+  coverFile: File | null = null;
   savingAlbum = false;
+  albumError = '';
   showAlbumForm = false;
 
   uploadFiles: File[] = [];
@@ -39,7 +46,7 @@ export class GalleryComponent implements OnInit {
   uploadError = '';
 
   deletePhotoId: number | null = null;
-  deleteAlbumId: number | null = null;
+  deleteAlbumSlug: string | null = null;
 
   constructor(private api: ApiService) {}
 
@@ -62,12 +69,44 @@ export class GalleryComponent implements OnInit {
     });
   }
 
+  autoSlug(): void {
+    if (!this.newAlbum.slug) {
+      this.newAlbum.slug = (this.newAlbum.name || '')
+        .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    }
+  }
+
+  onCoverFile(e: Event): void {
+    this.coverFile = (e.target as HTMLInputElement).files?.[0] || null;
+  }
+
   saveAlbum(form: NgForm): void {
     if (form.invalid) return;
+    if (!this.newAlbum.slug) this.autoSlug();
+    if (!this.newAlbum.name || !this.newAlbum.slug) return;
     this.savingAlbum = true;
-    this.api.post<Album>('gallery/albums/', this.newAlbum).subscribe({
-      next: a => { this.albums.push(a); this.newAlbum = { title: '', description: '' }; this.showAlbumForm = false; this.savingAlbum = false; },
-      error: () => { this.savingAlbum = false; },
+    this.albumError = '';
+
+    const fd = new FormData();
+    fd.append('name', this.newAlbum.name);
+    fd.append('slug', this.newAlbum.slug);
+    fd.append('description', this.newAlbum.description || '');
+    fd.append('is_visible', this.newAlbum.is_visible ? 'true' : 'false');
+    fd.append('order', String(this.newAlbum.order || 0));
+    if (this.coverFile) fd.append('cover_image', this.coverFile);
+
+    this.api.postForm<Album>('gallery/albums/', fd).subscribe({
+      next: a => {
+        this.albums.push(a);
+        this.newAlbum = { name: '', slug: '', description: '', is_visible: true, order: 0 };
+        this.coverFile = null;
+        this.showAlbumForm = false;
+        this.savingAlbum = false;
+      },
+      error: err => {
+        this.savingAlbum = false;
+        this.albumError = this.formatError(err) || 'Failed to create album.';
+      },
     });
   }
 
@@ -80,45 +119,64 @@ export class GalleryComponent implements OnInit {
     if (!this.uploadFiles.length || !this.selectedAlbum) return;
     this.uploading = true;
     this.uploadError = '';
-    let done = 0;
+    let done = 0; let failed = 0;
+    const total = this.uploadFiles.length;
     this.uploadFiles.forEach(file => {
       const fd = new FormData();
       fd.append('image', file);
       fd.append('album', String(this.selectedAlbum!.id));
       if (this.uploadCaption) fd.append('caption', this.uploadCaption);
       this.api.postForm<Photo>('gallery/photos/', fd).subscribe({
-        next: p => {
-          this.photos.push(p);
-          done++;
-          if (done === this.uploadFiles.length) { this.uploading = false; this.uploadFiles = []; this.uploadCaption = ''; }
-        },
-        error: () => { this.uploading = false; this.uploadError = 'Some uploads failed.'; },
+        next: p => { this.photos.push(p); done++; this.maybeFinish(done, failed, total); },
+        error: () => { failed++; this.uploadError = 'Some uploads failed.'; this.maybeFinish(done, failed, total); },
       });
     });
   }
+  private maybeFinish(done: number, failed: number, total: number): void {
+    if (done + failed >= total) {
+      this.uploading = false;
+      this.uploadFiles = [];
+      this.uploadCaption = '';
+      const input = document.querySelector<HTMLInputElement>('input[type="file"][multiple]');
+      if (input) input.value = '';
+      if (this.selectedAlbum) {
+        const a = this.albums.find(x => x.id === this.selectedAlbum!.id);
+        if (a) a.photo_count = (a.photo_count || 0) + done;
+      }
+    }
+  }
 
   confirmDeletePhoto(id: number): void { this.deletePhotoId = id; }
-  confirmDeleteAlbum(id: number): void { this.deleteAlbumId = id; }
+  confirmDeleteAlbum(slug: string): void { this.deleteAlbumSlug = slug; }
 
   deletePhoto(): void {
     if (!this.deletePhotoId) return;
-    this.api.delete(`gallery/photos/${this.deletePhotoId}/`).subscribe({
-      next: () => { this.photos = this.photos.filter(p => p.id !== this.deletePhotoId); this.deletePhotoId = null; },
+    const id = this.deletePhotoId;
+    this.api.delete(`gallery/photos/${id}/`).subscribe({
+      next: () => { this.photos = this.photos.filter(p => p.id !== id); this.deletePhotoId = null; },
       error: () => { this.deletePhotoId = null; },
     });
   }
 
   deleteAlbum(): void {
-    if (!this.deleteAlbumId) return;
-    this.api.delete(`gallery/albums/${this.deleteAlbumId}/`).subscribe({
+    if (!this.deleteAlbumSlug) return;
+    const slug = this.deleteAlbumSlug;
+    this.api.delete(`gallery/albums/${slug}/`).subscribe({
       next: () => {
-        this.albums = this.albums.filter(a => a.id !== this.deleteAlbumId);
-        if (this.selectedAlbum?.id === this.deleteAlbumId) this.selectedAlbum = null;
-        this.deleteAlbumId = null;
+        this.albums = this.albums.filter(a => a.slug !== slug);
+        if (this.selectedAlbum?.slug === slug) this.selectedAlbum = null;
+        this.deleteAlbumSlug = null;
       },
-      error: () => { this.deleteAlbumId = null; },
+      error: () => { this.deleteAlbumSlug = null; },
     });
   }
 
   imageUrl(p: string | null): string { return p ? this.api.mediaUrl(p) : ''; }
+
+  private formatError(err: any): string {
+    const e = err?.error;
+    if (!e) return '';
+    if (typeof e === 'string') return e;
+    return Object.entries(e).map(([k, v]) => `${k}: ${(Array.isArray(v) ? v.join(', ') : v)}`).join('  ');
+  }
 }

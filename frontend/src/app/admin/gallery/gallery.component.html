@@ -9,13 +9,30 @@
   <h3>Create Album</h3>
   <form #af="ngForm" (ngSubmit)="saveAlbum(af)" novalidate>
     <div class="form-row">
-      <label>Album Title *</label>
-      <input name="title" [(ngModel)]="newAlbum.title" required placeholder="e.g. Annual Sports Day 2024" />
+      <label>Album Name *</label>
+      <input name="name" [(ngModel)]="newAlbum.name" (blur)="autoSlug()" required placeholder="e.g. Annual Sports Day 2024" />
+    </div>
+    <div class="form-row">
+      <label>Slug *</label>
+      <input name="slug" [(ngModel)]="newAlbum.slug" required placeholder="annual-sports-day-2024" />
+      <small class="muted">URL-friendly identifier (lowercase letters, numbers, dashes). Auto-filled from name.</small>
     </div>
     <div class="form-row">
       <label>Description</label>
       <textarea name="description" [(ngModel)]="newAlbum.description" rows="2"></textarea>
     </div>
+    <div class="form-row">
+      <label>Cover image (optional)</label>
+      <input type="file" accept="image/*" (change)="onCoverFile($event)" />
+    </div>
+    <div class="form-row">
+      <label>Order</label>
+      <input type="number" name="order" [(ngModel)]="newAlbum.order" />
+    </div>
+    <div class="form-row">
+      <label><input type="checkbox" name="is_visible" [(ngModel)]="newAlbum.is_visible" /> Visible on public gallery</label>
+    </div>
+    <div class="alert-error" *ngIf="albumError">{{ albumError }}</div>
     <div class="form-actions">
       <button type="button" class="btn btn-outline" (click)="showAlbumForm = false">Cancel</button>
       <button type="submit" class="btn btn-primary" [disabled]="savingAlbum">{{ savingAlbum ? 'Creating…' : 'Create Album' }}</button>
@@ -32,11 +49,11 @@
         <span *ngIf="!a.cover_image">🖼️</span>
       </div>
       <div class="album-info">
-        <h3>{{ a.title }}</h3>
-        <p class="muted">{{ a.photo_count }} photos</p>
+        <h3>{{ a.name }}</h3>
+        <p class="muted">{{ a.photo_count }} photos · {{ a.is_visible ? 'visible' : 'hidden' }}</p>
         <div class="album-actions">
           <button class="btn-sm" (click)="openAlbum(a)">Open</button>
-          <button class="btn-sm danger" (click)="confirmDeleteAlbum(a.id)">Delete</button>
+          <button class="btn-sm danger" (click)="confirmDeleteAlbum(a.slug)">Delete</button>
         </div>
       </div>
     </div>
@@ -46,7 +63,7 @@
 
 <!-- Album photos -->
 <ng-container *ngIf="selectedAlbum">
-  <h2 class="album-title">{{ selectedAlbum.title }}</h2>
+  <h2 class="album-title">{{ selectedAlbum.name }}</h2>
 
   <div class="card upload-section">
     <h3>Upload Photos</h3>
@@ -57,7 +74,7 @@
       </div>
       <div class="form-row">
         <label>Caption (optional)</label>
-        <input [(ngModel)]="uploadCaption" placeholder="Caption for all selected photos" />
+        <input [(ngModel)]="uploadCaption" name="uploadCaption" placeholder="Caption for all selected photos" />
       </div>
     </div>
     <div class="alert-error" *ngIf="uploadError">{{ uploadError }}</div>
@@ -92,12 +109,12 @@
   </div>
 </div>
 
-<div class="modal-backdrop" *ngIf="deleteAlbumId" (click)="deleteAlbumId = null">
+<div class="modal-backdrop" *ngIf="deleteAlbumSlug" (click)="deleteAlbumSlug = null">
   <div class="modal card" (click)="$event.stopPropagation()">
     <h3>Delete Album?</h3>
     <p>All photos in this album will also be deleted.</p>
     <div class="modal-actions">
-      <button class="btn btn-outline" (click)="deleteAlbumId = null">Cancel</button>
+      <button class="btn btn-outline" (click)="deleteAlbumSlug = null">Cancel</button>
       <button class="btn btn-danger" (click)="deleteAlbum()">Delete Album</button>
     </div>
   </div>

@@ -19,29 +19,32 @@
       <input name="slug" [(ngModel)]="model.slug" required placeholder="url-friendly-slug" />
     </div>
     <div class="form-row">
-      <label>Category</label>
-      <input name="category" [(ngModel)]="model.category" placeholder="e.g. Announcement, Event" />
+      <label>Tag / Category</label>
+      <input name="tag" [(ngModel)]="model.tag" placeholder="e.g. Announcement, Event" />
     </div>
     <div class="form-row">
-      <label>Published Date</label>
-      <input type="date" name="published_at" [(ngModel)]="model.published_at" />
+      <label>Publish At</label>
+      <input type="datetime-local" name="publish_at" [(ngModel)]="model.publish_at" />
     </div>
     <div class="form-row span-2">
       <label>Summary</label>
-      <textarea name="summary" [(ngModel)]="model.summary" rows="3" placeholder="Brief summary shown in news listing…"></textarea>
+      <textarea name="summary" [(ngModel)]="model.summary" rows="3" maxlength="400" placeholder="Brief summary shown in news cards (max 400 chars)…"></textarea>
     </div>
     <div class="form-row span-2">
-      <label>Content *</label>
-      <textarea name="content" [(ngModel)]="model.content" required rows="12" placeholder="Full article content (HTML supported)…"></textarea>
+      <label>Content</label>
+      <textarea name="body" [(ngModel)]="model.body" rows="12" placeholder="Full article content (HTML supported)…"></textarea>
     </div>
     <div class="form-row">
-      <label>Thumbnail</label>
-      <input type="file" accept="image/*" (change)="onThumbnailChange($event)" />
+      <label>Image</label>
+      <input type="file" accept="image/*" (change)="onImageChange($event)" />
+      <img *ngIf="existingImage && !imageFile" [src]="imageUrl(existingImage)" style="max-height:120px;margin-top:8px;border-radius:6px" />
     </div>
     <div class="form-row checkboxes">
       <label class="checkbox-label">
-        <input type="checkbox" name="is_published" [(ngModel)]="model.is_published" />
-        Published
+        <select name="status" [(ngModel)]="model.status" style="width:auto">
+          <option value="draft">Draft</option>
+          <option value="published">Published</option>
+        </select>
       </label>
       <label class="checkbox-label">
         <input type="checkbox" name="is_featured" [(ngModel)]="model.is_featured" />

@@ -37,7 +37,7 @@ const routes: Routes = [
       { path: 'faculty', component: AdminFacultyComponent },
       { path: 'news', component: NewsListComponent },
       { path: 'news/new', component: NewsFormComponent },
-      { path: 'news/:id/edit', component: NewsFormComponent },
+      { path: 'news/:slug/edit', component: NewsFormComponent },
       { path: 'notices', component: AdminNoticesComponent },
       { path: 'gallery', component: GalleryComponent },
       { path: 'admissions', component: AdmissionsComponent },

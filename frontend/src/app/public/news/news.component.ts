@@ -6,12 +6,13 @@ interface NewsItem {
   id: number;
   title: string;
   slug: string;
+  tag: string;
   summary: string;
-  content: string;
-  thumbnail: string | null;
-  published_at: string;
-  category: string;
+  body: string;
+  image: string | null;
+  status: 'draft' | 'published';
   is_featured: boolean;
+  publish_at: string;
 }
 
 @Component({
@@ -23,8 +24,8 @@ export class NewsComponent implements OnInit {
   news: NewsItem[] = [];
   selected: NewsItem | null = null;
   loading = true;
-  categories: string[] = [];
-  activeCategory = '';
+  tags: string[] = [];
+  activeTag = '';
 
   constructor(private api: ApiService, private route: ActivatedRoute, private router: Router) {}
 
@@ -41,11 +42,13 @@ export class NewsComponent implements OnInit {
   loadList(): void {
     this.selected = null;
     this.loading = true;
-    const query = this.activeCategory ? `news/?category=${encodeURIComponent(this.activeCategory)}&ordering=-published_at` : 'news/?ordering=-published_at';
+    const query = this.activeTag
+      ? `news/articles/?tag=${encodeURIComponent(this.activeTag)}&ordering=-publish_at`
+      : 'news/articles/?ordering=-publish_at';
     this.api.get<{ results: NewsItem[] } | NewsItem[]>(query).subscribe({
       next: res => {
         this.news = Array.isArray(res) ? res : (res as any).results || [];
-        this.categories = [...new Set(this.news.map(n => n.category).filter(Boolean))];
+        this.tags = [...new Set(this.news.map(n => n.tag).filter(Boolean))];
         this.loading = false;
       },
       error: () => { this.loading = false; },
@@ -54,18 +57,18 @@ export class NewsComponent implements OnInit {
 
   loadArticle(slug: string): void {
     this.loading = true;
-    this.api.get<NewsItem>(`news/${slug}/`).subscribe({
+    this.api.get<NewsItem>(`news/articles/${slug}/`).subscribe({
       next: item => { this.selected = item; this.loading = false; },
       error: () => { this.router.navigate(['/news']); },
     });
   }
 
-  filterBy(cat: string): void {
-    this.activeCategory = cat;
+  filterBy(tag: string): void {
+    this.activeTag = tag;
     this.loadList();
   }
 
-  thumbnailUrl(path: string | null): string {
+  imageUrl(path: string | null): string {
     return path ? this.api.mediaUrl(path) : '';
   }
 }
