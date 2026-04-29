@@ -33,7 +33,7 @@ import { ApiService } from '../../core/api.service';
       <p *ngIf="msg" class="muted" style="text-align:right;margin-top:.5rem">{{msg}}</p>
     </div>
   </div>`,
-  styles: [`.page{padding:1rem;max-width:760px}`],
+  styles: [],
 })
 export class AdminHeroComponent implements OnInit {
   hero: any = null; saving=false; msg=''; pendingFile: File | null = null;

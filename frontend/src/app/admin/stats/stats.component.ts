@@ -26,7 +26,7 @@ import { ApiService } from '../../core/api.service';
     </table>
     <p *ngIf="!items.length" class="muted">No stats yet.</p>
   </div>`,
-  styles: [`.page{padding:1rem} .page-head{display:flex;justify-content:space-between;margin-bottom:1rem}`],
+  styles: [],
 })
 export class AdminStatsComponent implements OnInit {
   items: any[] = [];

@@ -40,9 +40,7 @@ import { ApiService } from '../../core/api.service';
       </div>
     </div>
   </div>`,
-  styles: [`.page{padding:1rem} .page-head{display:flex;justify-content:space-between;margin-bottom:1rem}
-  .modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:1000}
-  .modal-card{width:min(540px,92vw);max-height:90vh;overflow:auto}`],
+  styles: [],
 })
 export class AdminTestimonialsComponent implements OnInit {
   items: any[] = []; showForm=false; editing: any=null; saving=false;

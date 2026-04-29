@@ -47,7 +47,7 @@ import { ApiService } from '../../core/api.service';
       <button class="btn btn-primary" style="margin-top:.5rem" (click)="addValue()">+ Add Core Value</button>
     </section>
   </div>`,
-  styles: [`.page{padding:1rem;max-width:880px}`],
+  styles: [],
 })
 export class AdminAboutComponent implements OnInit {
   about: any = null; principal: any = null; values: any[] = []; pendingPhoto: File | null = null;

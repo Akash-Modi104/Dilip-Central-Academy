@@ -22,7 +22,7 @@ import { ApiService } from '../../core/api.service';
     </div>
     <p *ngIf="!items.length" class="muted">No messages yet.</p>
   </div>`,
-  styles: [`.page{padding:1rem;max-width:900px}`],
+  styles: [],
 })
 export class AdminContactInboxComponent implements OnInit {
   items: any[] = [];
