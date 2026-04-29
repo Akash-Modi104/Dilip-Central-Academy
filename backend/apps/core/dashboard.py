@@ -18,7 +18,7 @@ def dashboard_stats(request):
         'total_news': NewsArticle.objects.count(),
         'total_gallery_photos': Photo.objects.count(),
         'total_admissions': Enquiry.objects.count(),
-        'pending_admissions': Enquiry.objects.filter(status='unread').count(),
+        'pending_admissions': Enquiry.objects.filter(status=Enquiry.PENDING).count(),
         'total_messages': ContactSubmission.objects.count(),
         'unread_messages': ContactSubmission.objects.filter(is_read=False).count(),
         'active_notices': Notice.objects.filter(is_active=True).filter(

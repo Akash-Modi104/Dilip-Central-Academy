@@ -12,6 +12,8 @@ interface NavLink { id: number; label: string; url: string; order: number; is_ac
 export class PublicLayoutComponent implements OnInit {
   settings: SiteSettings | null = null;
   navLinks: NavLink[] = [];
+  navOpen = false;
+  year = new Date().getFullYear();
   defaultNav = [
     { label: 'Home', url: '/' },
     { label: 'About', url: '/about' },

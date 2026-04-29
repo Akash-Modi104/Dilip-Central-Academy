@@ -1,19 +1,33 @@
-<header class="site-header">
+<header class="site-header" [class.is-open]="navOpen">
   <div class="container header-inner">
-    <a routerLink="/" class="brand">
+    <a routerLink="/" class="brand" (click)="navOpen=false">
       <img *ngIf="logoUrl()" [src]="logoUrl()" alt="logo" class="logo" />
-      <div>
+      <div *ngIf="!logoUrl()" class="logo logo--mark">🎓</div>
+      <div class="brand-text">
         <div class="school-name">{{ settings?.school_name || 'School' }}</div>
         <div class="tagline" *ngIf="settings?.tagline">{{ settings?.tagline }}</div>
       </div>
     </a>
-    <nav class="main-nav">
+
+    <button class="nav-toggle" type="button" (click)="navOpen = !navOpen" [attr.aria-expanded]="navOpen" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+
+    <nav class="main-nav" [class.open]="navOpen">
       <ng-container *ngIf="navLinks.length; else defaultNavTpl">
-        <a *ngFor="let l of navLinks" [href]="l.url" [target]="l.open_in_new_tab ? '_blank' : '_self'">{{ l.label }}</a>
+        <a *ngFor="let l of navLinks"
+           [href]="l.url"
+           [target]="l.open_in_new_tab ? '_blank' : '_self'"
+           (click)="navOpen=false">{{ l.label }}</a>
       </ng-container>
       <ng-template #defaultNavTpl>
-        <a *ngFor="let l of defaultNav" [routerLink]="l.url" routerLinkActive="active" [routerLinkActiveOptions]="{exact: l.url === '/'}">{{ l.label }}</a>
+        <a *ngFor="let l of defaultNav"
+           [routerLink]="l.url"
+           routerLinkActive="active"
+           [routerLinkActiveOptions]="{exact: l.url === '/'}"
+           (click)="navOpen=false">{{ l.label }}</a>
       </ng-template>
+      <a routerLink="/admissions" class="nav-cta" (click)="navOpen=false">Apply</a>
     </nav>
   </div>
 </header>
@@ -24,25 +38,48 @@
 
 <footer class="site-footer">
   <div class="container footer-grid">
-    <div>
-      <h4>{{ settings?.school_name }}</h4>
+    <div class="footer-brand">
+      <div class="footer-brand-row">
+        <img *ngIf="logoUrl()" [src]="logoUrl()" alt="logo" class="footer-logo" />
+        <div *ngIf="!logoUrl()" class="footer-logo footer-logo--mark">🎓</div>
+        <h4>{{ settings?.school_name }}</h4>
+      </div>
       <p class="muted">{{ settings?.tagline }}</p>
-      <p class="muted" *ngIf="settings?.founded_year">Established {{ settings?.founded_year }}</p>
+      <p class="muted small" *ngIf="settings?.founded_year">Established {{ settings?.founded_year }}</p>
     </div>
+
+    <div>
+      <h4>Quick Links</h4>
+      <ul class="footer-links">
+        <li><a routerLink="/about">About</a></li>
+        <li><a routerLink="/academics">Academics</a></li>
+        <li><a routerLink="/admissions">Admissions</a></li>
+        <li><a routerLink="/news">News</a></li>
+        <li><a routerLink="/gallery">Gallery</a></li>
+        <li><a routerLink="/contact">Contact</a></li>
+      </ul>
+    </div>
+
     <div>
       <h4>Contact</h4>
-      <p>{{ settings?.address }}</p>
-      <p>{{ settings?.phone }} · {{ settings?.email }}</p>
+      <p *ngIf="settings?.address">📍 {{ settings?.address }}</p>
+      <p *ngIf="settings?.phone">📞 {{ settings?.phone }}</p>
+      <p *ngIf="settings?.email">✉️ {{ settings?.email }}</p>
+      <p *ngIf="settings?.office_hours" class="muted small">{{ settings?.office_hours }}</p>
     </div>
+
     <div>
-      <h4>Follow</h4>
-      <p>
-        <a *ngIf="settings?.facebook_url" [href]="settings?.facebook_url" target="_blank">Facebook</a>
-        <a *ngIf="settings?.instagram_url" [href]="settings?.instagram_url" target="_blank">Instagram</a>
-        <a *ngIf="settings?.youtube_url" [href]="settings?.youtube_url" target="_blank">YouTube</a>
-        <a *ngIf="settings?.twitter_url" [href]="settings?.twitter_url" target="_blank">Twitter</a>
-      </p>
+      <h4>Follow Us</h4>
+      <div class="social-row">
+        <a *ngIf="settings?.facebook_url"  [href]="settings?.facebook_url"  target="_blank" rel="noopener" aria-label="Facebook">f</a>
+        <a *ngIf="settings?.instagram_url" [href]="settings?.instagram_url" target="_blank" rel="noopener" aria-label="Instagram">◎</a>
+        <a *ngIf="settings?.youtube_url"   [href]="settings?.youtube_url"   target="_blank" rel="noopener" aria-label="YouTube">▶</a>
+        <a *ngIf="settings?.twitter_url"   [href]="settings?.twitter_url"   target="_blank" rel="noopener" aria-label="Twitter">𝕏</a>
+        <a *ngIf="settings?.linkedin_url"  [href]="settings?.linkedin_url"  target="_blank" rel="noopener" aria-label="LinkedIn">in</a>
+      </div>
     </div>
   </div>
-  <div class="container copyright muted">© {{ settings?.school_name }}</div>
+  <div class="container copyright">
+    © {{ year }} {{ settings?.school_name }}. All rights reserved.
+  </div>
 </footer>
