@@ -5,49 +5,88 @@
   </div>
 </div>
 
-<section class="section">
+<!-- About content (history) -->
+<section class="section" *ngIf="hasAbout() || settings?.school_name">
   <div class="container about-grid">
     <div class="about-text">
       <h2>Our Story</h2>
-      <p>{{ settings?.school_name }} has been a pillar of educational excellence in our community
-        <ng-container *ngIf="settings?.founded_year"> since {{ settings?.founded_year }}</ng-container>.
-        We believe every child deserves a quality education that prepares them not just for exams,
-        but for life.</p>
-      <p>Our dedicated faculty, modern facilities, and student-centred approach have helped thousands
-        of graduates go on to successful careers and fulfilling lives.</p>
+      <div *ngIf="about?.history; else fallbackStory" [innerHTML]="about?.history"></div>
+      <ng-template #fallbackStory>
+        <p>{{ settings?.school_name }} has been a pillar of educational excellence in our community
+          <ng-container *ngIf="settings?.founded_year"> since {{ settings?.founded_year }}</ng-container>.
+          We believe every child deserves a quality education that prepares them not just for exams,
+          but for life.</p>
+        <p>Our dedicated faculty, modern facilities, and student-centred approach have helped thousands
+          of graduates go on to successful careers and fulfilling lives.</p>
+      </ng-template>
     </div>
     <div class="about-cards">
-      <div class="card value-card">
+      <div class="card value-card" *ngIf="about?.mission">
+        <h3>🎯 Mission</h3>
+        <div [innerHTML]="about?.mission"></div>
+      </div>
+      <div class="card value-card" *ngIf="!about?.mission">
         <h3>🎯 Mission</h3>
         <p>To provide an inclusive, high-quality education that inspires curiosity, critical thinking, and a love of lifelong learning.</p>
       </div>
-      <div class="card value-card">
+      <div class="card value-card" *ngIf="about?.vision">
+        <h3>🌟 Vision</h3>
+        <div [innerHTML]="about?.vision"></div>
+      </div>
+      <div class="card value-card" *ngIf="!about?.vision">
         <h3>🌟 Vision</h3>
         <p>To be the leading institution that produces responsible, creative, and compassionate leaders for tomorrow's world.</p>
-      </div>
-      <div class="card value-card">
-        <h3>💡 Values</h3>
-        <p>Integrity, Respect, Excellence, Innovation, and Community guide everything we do.</p>
       </div>
     </div>
   </div>
 </section>
 
-<section class="section bg-light" *ngIf="!loading">
+<!-- Core Values -->
+<section class="section bg-light" *ngIf="values.length">
   <div class="container">
-    <h2 class="section-title">Our Team</h2>
-    <div class="staff-grid" *ngIf="staff.length; else noStaff">
+    <h2 class="section-title">Our Core Values</h2>
+    <div class="values-grid">
+      <div class="value-card-sm card" *ngFor="let v of values">
+        <div class="value-icon" *ngIf="v.icon">{{ v.icon }}</div>
+        <h3>{{ v.title }}</h3>
+        <p class="muted">{{ v.description }}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Principal's Message -->
+<section class="section" *ngIf="principal?.message">
+  <div class="container principal-block">
+    <h2 class="section-title">Principal's Message</h2>
+    <div class="principal-card card">
+      <div class="principal-photo" [style.backgroundImage]="principal?.photo ? 'url(' + photoUrl(principal!.photo) + ')' : 'none'">
+        <span *ngIf="!principal?.photo">{{ principal?.name?.charAt(0) }}</span>
+      </div>
+      <div class="principal-body">
+        <div class="principal-quote" [innerHTML]="principal?.message"></div>
+        <div class="principal-sign">
+          <strong>— {{ principal?.name }}</strong>
+          <span class="muted" *ngIf="principal?.designation">{{ principal?.designation }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Highlighted Staff -->
+<section class="section bg-light" *ngIf="!loading && staff.length">
+  <div class="container">
+    <h2 class="section-title">Meet Our Team</h2>
+    <div class="staff-grid">
       <div class="staff-card card" *ngFor="let m of staff">
         <div class="staff-photo" [style.backgroundImage]="m.photo ? 'url(' + photoUrl(m.photo) + ')' : 'none'">
           <span *ngIf="!m.photo" class="staff-initials">{{ m.name.charAt(0) }}</span>
         </div>
         <h3>{{ m.name }}</h3>
-        <p class="designation">{{ m.designation }}</p>
-        <p class="bio muted">{{ m.bio }}</p>
+        <p class="designation">{{ m.designation }}<span *ngIf="m.subject"> · {{ m.subject }}</span></p>
+        <p class="bio muted" *ngIf="m.bio">{{ m.bio }}</p>
       </div>
     </div>
-    <ng-template #noStaff>
-      <p class="muted text-center">Staff information coming soon.</p>
-    </ng-template>
   </div>
 </section>

@@ -9,13 +9,44 @@
   <div class="container">
     <h2 class="section-title">Admission Process</h2>
     <div class="steps-list">
-      <div class="step" *ngFor="let s of steps">
-        <div class="step-num">{{ s.num }}</div>
+      <div class="step" *ngFor="let s of steps; let i = index">
+        <div class="step-num">{{ s.icon || stepNum(i) }}</div>
         <div>
           <h3>{{ s.title }}</h3>
-          <p class="muted">{{ s.desc }}</p>
+          <p class="muted">{{ s.description }}</p>
         </div>
       </div>
+    </div>
+  </div>
+</section>
+
+<section class="section bg-light" *ngIf="importantDates.length">
+  <div class="container">
+    <h2 class="section-title">Important Dates</h2>
+    <div class="dates-grid">
+      <div class="date-card card" *ngFor="let d of importantDates">
+        <div class="date-icon">📅</div>
+        <h3>{{ d.label }}</h3>
+        <p class="muted">{{ d.date_text }}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" *ngIf="fees.length">
+  <div class="container">
+    <h2 class="section-title">Fee Structure</h2>
+    <div class="fees-card card">
+      <table class="fees-table">
+        <thead><tr><th>Item</th><th>Amount</th><th></th></tr></thead>
+        <tbody>
+          <tr *ngFor="let f of fees">
+            <td>{{ f.label }}</td>
+            <td><strong>{{ f.amount }}</strong></td>
+            <td class="muted">{{ f.note }}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </section>
@@ -57,8 +88,8 @@
           <input name="phone" [(ngModel)]="model.phone" required placeholder="+91 98765 43210" />
         </div>
         <div class="form-row">
-          <label>Email</label>
-          <input type="email" name="email" [(ngModel)]="model.email" placeholder="your@email.com" />
+          <label>Email *</label>
+          <input type="email" name="email" [(ngModel)]="model.email" required placeholder="your@email.com" />
         </div>
         <div class="form-row">
           <label>Message</label>

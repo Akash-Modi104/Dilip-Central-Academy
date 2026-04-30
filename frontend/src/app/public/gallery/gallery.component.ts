@@ -3,9 +3,11 @@ import { ApiService } from '../../core/api.service';
 
 interface GalleryAlbum {
   id: number;
-  title: string;
+  name: string;
+  slug: string;
   description: string;
   cover_image: string | null;
+  is_visible: boolean;
   photo_count: number;
   created_at: string;
 }
@@ -26,7 +28,8 @@ export class GalleryComponent implements OnInit {
   albums: GalleryAlbum[] = [];
   photos: GalleryPhoto[] = [];
   selectedAlbum: GalleryAlbum | null = null;
-  loading = true;
+  loadingAlbums = true;
+  loadingPhotos = false;
   lightboxPhoto: GalleryPhoto | null = null;
 
   constructor(private api: ApiService) {}
@@ -34,23 +37,24 @@ export class GalleryComponent implements OnInit {
   ngOnInit(): void {
     this.api.get<{ results: GalleryAlbum[] } | GalleryAlbum[]>('gallery/albums/').subscribe({
       next: res => {
-        this.albums = Array.isArray(res) ? res : (res as any).results || [];
-        this.loading = false;
+        const list = (Array.isArray(res) ? res : (res as any).results || []) as GalleryAlbum[];
+        this.albums = list.filter(a => a.is_visible !== false);
+        this.loadingAlbums = false;
       },
-      error: () => { this.loading = false; },
+      error: () => { this.loadingAlbums = false; },
     });
   }
 
   openAlbum(album: GalleryAlbum): void {
     this.selectedAlbum = album;
     this.photos = [];
-    this.loading = true;
+    this.loadingPhotos = true;
     this.api.get<{ results: GalleryPhoto[] } | GalleryPhoto[]>(`gallery/photos/?album=${album.id}`).subscribe({
       next: res => {
         this.photos = Array.isArray(res) ? res : (res as any).results || [];
-        this.loading = false;
+        this.loadingPhotos = false;
       },
-      error: () => { this.loading = false; },
+      error: () => { this.loadingPhotos = false; },
     });
   }
 

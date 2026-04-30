@@ -19,7 +19,7 @@
     <ng-container *ngIf="selectedAlbum">
       <div class="album-header">
         <button class="btn btn-outline" (click)="selectedAlbum = null">← All Albums</button>
-        <h2>{{ selectedAlbum.title }}</h2>
+        <h2>{{ selectedAlbum.name }}</h2>
       </div>
       <div *ngIf="loading" class="loading">Loading photos…</div>
       <div class="photo-grid" *ngIf="!loading">
@@ -42,7 +42,7 @@
             <div class="album-cover-placeholder" *ngIf="!a.cover_image">🖼️</div>
           </div>
           <div class="album-info">
-            <h3>{{ a.title }}</h3>
+            <h3>{{ a.name }}</h3>
             <p class="muted">{{ a.description }}</p>
             <span class="photo-count">{{ a.photo_count }} photos</span>
           </div>

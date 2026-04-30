@@ -5,19 +5,19 @@
   </div>
 </div>
 
-<section class="section">
+<section class="section" *ngIf="!selected">
   <div class="container">
     <h2 class="section-title">Our Programs</h2>
 
     <div *ngIf="loading" class="loading">Loading programs…</div>
 
     <div class="programs-grid" *ngIf="!loading && programs.length">
-      <div class="program-card card" *ngFor="let p of programs">
-        <div class="program-icon">{{ iconFor(p.level) }}</div>
-        <h3>{{ p.name }}</h3>
-        <p class="level-badge">{{ p.level | titlecase }}</p>
-        <p class="muted">{{ p.description }}</p>
-        <p class="duration" *ngIf="p.duration">⏱ {{ p.duration }}</p>
+      <div class="program-card card" *ngFor="let p of programs" (click)="selected = p" style="cursor:pointer">
+        <div class="program-icon" *ngIf="p.icon || !p.image">{{ p.icon || '📘' }}</div>
+        <img *ngIf="p.image" [src]="imageUrl(p.image)" [alt]="p.title" class="program-image" />
+        <h3>{{ p.title }}</h3>
+        <p class="muted">{{ p.short_description }}</p>
+        <span class="program-link">Read more →</span>
       </div>
     </div>
 
@@ -27,34 +27,38 @@
   </div>
 </section>
 
-<section class="section bg-light">
+<section class="section" *ngIf="selected">
+  <div class="container program-detail">
+    <button class="btn btn-outline" (click)="selected = null">← All Programs</button>
+    <div class="detail-head">
+      <span class="program-icon-lg" *ngIf="selected.icon">{{ selected.icon }}</span>
+      <h1>{{ selected.title }}</h1>
+    </div>
+    <p class="lead muted" *ngIf="selected.short_description">{{ selected.short_description }}</p>
+    <img *ngIf="selected.image" [src]="imageUrl(selected.image)" [alt]="selected.title" class="program-banner" />
+    <div class="detail-grid">
+      <div *ngIf="selected.description">
+        <h3>About</h3>
+        <div [innerHTML]="selected.description"></div>
+      </div>
+      <div *ngIf="selected.curriculum">
+        <h3>Curriculum</h3>
+        <div [innerHTML]="selected.curriculum"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section bg-light" *ngIf="!selected">
   <div class="container">
     <h2 class="section-title">Academic Highlights</h2>
     <div class="highlights-grid">
-      <div class="highlight card">
-        <h3>📊 Board Results</h3>
-        <p>Consistently achieving 95%+ pass rates with numerous distinction holders every year.</p>
-      </div>
-      <div class="highlight card">
-        <h3>🔬 Science Lab</h3>
-        <p>Well-equipped physics, chemistry, and biology labs for hands-on learning experiences.</p>
-      </div>
-      <div class="highlight card">
-        <h3>💻 Computer Lab</h3>
-        <p>Modern computer lab with high-speed internet and latest software for digital literacy.</p>
-      </div>
-      <div class="highlight card">
-        <h3>📖 Library</h3>
-        <p>A rich collection of books, journals, and digital resources to support every learner.</p>
-      </div>
-      <div class="highlight card">
-        <h3>🎨 Arts & Crafts</h3>
-        <p>Creative arts program that develops imagination, expression, and fine motor skills.</p>
-      </div>
-      <div class="highlight card">
-        <h3>⚽ Sports</h3>
-        <p>Comprehensive sports curriculum including cricket, football, athletics, and more.</p>
-      </div>
+      <div class="highlight card"><h3>📊 Board Results</h3><p>Consistently achieving 95%+ pass rates with numerous distinction holders every year.</p></div>
+      <div class="highlight card"><h3>🔬 Science Lab</h3><p>Well-equipped physics, chemistry, and biology labs for hands-on learning experiences.</p></div>
+      <div class="highlight card"><h3>💻 Computer Lab</h3><p>Modern computer lab with high-speed internet and latest software for digital literacy.</p></div>
+      <div class="highlight card"><h3>📖 Library</h3><p>A rich collection of books, journals, and digital resources to support every learner.</p></div>
+      <div class="highlight card"><h3>🎨 Arts & Crafts</h3><p>Creative arts program that develops imagination, expression, and fine motor skills.</p></div>
+      <div class="highlight card"><h3>⚽ Sports</h3><p>Comprehensive sports curriculum including cricket, football, athletics, and more.</p></div>
     </div>
   </div>
 </section>

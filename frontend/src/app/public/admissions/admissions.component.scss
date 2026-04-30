@@ -84,6 +84,38 @@
 
 .success-icon { font-size: 3rem; }
 
+.dates-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+.date-card {
+  text-align: center;
+  padding: 1.5rem 1rem;
+  h3 { margin: .5rem 0 .25rem; font-size: 1rem; }
+  p { margin: 0; }
+}
+.date-icon { font-size: 2rem; }
+
+.fees-card { padding: 0; overflow: hidden; }
+.fees-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.fees-table th, .fees-table td {
+  padding: .9rem 1.1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+}
+.fees-table th {
+  background: var(--color-bg-soft);
+  font-size: .8rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--color-muted);
+}
+.fees-table tr:last-child td { border-bottom: 0; }
+
 @media (max-width: 720px) {
   .form-section { grid-template-columns: 1fr; gap: 2rem; }
 }

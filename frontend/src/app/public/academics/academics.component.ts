@@ -3,11 +3,16 @@ import { ApiService } from '../../core/api.service';
 
 interface Program {
   id: number;
-  name: string;
+  slug: string;
+  title: string;
+  short_description: string;
   description: string;
-  level: string;
-  duration: string;
-  icon: string | null;
+  curriculum: string;
+  icon: string;
+  image: string | null;
+  is_featured: boolean;
+  is_active: boolean;
+  order: number;
 }
 
 @Component({
@@ -17,28 +22,21 @@ interface Program {
 })
 export class AcademicsComponent implements OnInit {
   programs: Program[] = [];
+  selected: Program | null = null;
   loading = true;
 
-  levelIcons: Record<string, string> = {
-    primary: '🏫',
-    secondary: '📗',
-    higher_secondary: '🎓',
-    default: '📚',
-  };
-
-  constructor(private api: ApiService) {}
+  constructor(public api: ApiService) {}
 
   ngOnInit(): void {
     this.api.get<{ results: Program[] } | Program[]>('academics/programs/').subscribe({
       next: res => {
-        this.programs = Array.isArray(res) ? res : (res as any).results || [];
+        const list = (Array.isArray(res) ? res : (res as any).results || []) as Program[];
+        this.programs = list.filter(p => p.is_active !== false).sort((a, b) => a.order - b.order);
         this.loading = false;
       },
       error: () => { this.loading = false; },
     });
   }
 
-  iconFor(level: string): string {
-    return this.levelIcons[level] || this.levelIcons['default'];
-  }
+  imageUrl(path: string | null): string { return path ? this.api.mediaUrl(path) : ''; }
 }
