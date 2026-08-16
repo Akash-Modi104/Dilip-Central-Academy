@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, signal } from '@angular/core';
+import { Component, OnDestroy, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 type Notice = { date: string; title: string; detail: string };
 type GalleryItem = { title: string; image: string };
+type GalleryAlbum = { title: string; description: string; images: GalleryItem[] };
 type InfoCard = { title: string; detail: string };
 type Content = {
   schoolName: string; tagline: string; since: string; heroTitle: string; heroText: string;
@@ -12,6 +13,7 @@ type Content = {
   aboutTitle: string; aboutText: string; principalMessage: string; notices: Notice[]; gallery: GalleryItem[];
   logo: string; learningTitle: string; facilities: InfoCard[]; admissionsTitle: string; admissionsText: string;
   admissionSteps: InfoCard[]; admissionDocuments: string[]; resourcesTitle: string; resources: InfoCard[];
+  heroImages: GalleryItem[]; albums: GalleryAlbum[];
 };
 
 const defaults: Content = {
@@ -52,26 +54,42 @@ const defaults: Content = {
     { title: 'Recognition', image: 'assets/prospectus-10.jpeg' }, { title: 'School Drama', image: 'assets/prospectus-13.jpeg' },
     { title: 'School Function & Rangoli', image: 'assets/prospectus-12.jpeg' }, { title: 'Excursion & Champions', image: 'assets/prospectus-9.jpeg' }
   ],
+  heroImages: [
+    { title: 'Dilip Central Academy campus', image: 'assets/prospectus-cover.jpeg' },
+    { title: 'School activities', image: 'assets/prospectus-12.jpeg' },
+    { title: 'Student programmes', image: 'assets/prospectus-13.jpeg' }
+  ],
+  albums: [{
+    title: 'School Life', description: 'Recognition, cultural programmes, exhibitions and school functions.',
+    images: [
+      { title: 'Recognition', image: 'assets/prospectus-10.jpeg' }, { title: 'School Drama', image: 'assets/prospectus-13.jpeg' },
+      { title: 'School Function & Rangoli', image: 'assets/prospectus-12.jpeg' }, { title: 'Excursion & Champions', image: 'assets/prospectus-9.jpeg' }
+    ]
+  }],
 };
 
 @Component({
   selector: 'app-root', standalone: true, imports: [CommonModule, FormsModule],
   templateUrl: './app.component.html', styleUrl: './app.component.css'
 })
-export class AppComponent {
+export class AppComponent implements OnDestroy {
   private key = 'dca-site-content-v1';
   private apiBase = String((window as unknown as { DCA_API_URL?: string }).DCA_API_URL || '').replace(/\/$/, '');
   private token = sessionStorage.getItem('dca-api-token') || '';
   content = signal<Content>(this.load());
   draft: Content = structuredClone(this.content());
   adminOpen = signal(false); menuOpen = signal(false); saved = signal(false);
+  heroIndex = signal(0);
   isAdmin = signal(sessionStorage.getItem('dca-admin-session') === 'active' || !!sessionStorage.getItem('dca-api-token'));
   login = { username: '', password: '' }; loginError = signal('');
   mapUrl: SafeResourceUrl;
   enquiry = { parent: '', child: '', className: '', phone: '' };
+  private heroTimer = window.setInterval(() => this.nextHero(), 5000);
   constructor(private sanitizer: DomSanitizer) { this.mapUrl = this.makeMapUrl(); void this.loadRemote(); }
-  private async loadRemote(): Promise<void> { if (!this.apiBase) return; try { const response = await fetch(`${this.apiBase}/api/content/`); if (!response.ok) return; const result = await response.json() as { data?: Partial<Content> }; if (result.data && Object.keys(result.data).length) { const next = { ...defaults, ...result.data }; this.content.set(next); this.draft = structuredClone(next); } } catch { /* remain usable offline */ } }
-  private load(): Content { try { return { ...defaults, ...JSON.parse(localStorage.getItem(this.key) || '{}') }; } catch { return defaults; } }
+  ngOnDestroy(): void { window.clearInterval(this.heroTimer); }
+  private mergeContent(data: Partial<Content>): Content { return { ...defaults, ...data, heroImages: data.heroImages?.length ? data.heroImages : defaults.heroImages, albums: data.albums?.length ? data.albums : defaults.albums }; }
+  private async loadRemote(): Promise<void> { if (!this.apiBase) return; try { const response = await fetch(`${this.apiBase}/api/content/`); if (!response.ok) return; const result = await response.json() as { data?: Partial<Content> }; if (result.data && Object.keys(result.data).length) { const next = this.mergeContent(result.data); this.content.set(next); this.draft = structuredClone(next); } } catch { /* remain usable offline */ } }
+  private load(): Content { try { return this.mergeContent(JSON.parse(localStorage.getItem(this.key) || '{}')); } catch { return defaults; } }
   private makeMapUrl(): SafeResourceUrl { return this.sanitizer.bypassSecurityTrustResourceUrl('https://www.google.com/maps?q=23.8025032,85.465326&z=16&output=embed'); }
   openAdmin(): void { this.draft = structuredClone(this.content()); this.adminOpen.set(true); document.body.classList.add('modal-open'); }
   closeAdmin(): void { this.adminOpen.set(false); document.body.classList.remove('modal-open'); }
@@ -80,8 +98,19 @@ export class AppComponent {
   exportData(): void { const blob = new Blob([JSON.stringify(this.content(), null, 2)], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'dca-site-backup.json'; a.click(); URL.revokeObjectURL(a.href); }
   importData(event: Event): void { const input = event.target as HTMLInputElement; const file = input.files?.[0]; if (!file) return; const reader = new FileReader(); reader.onload = () => { try { this.draft = { ...defaults, ...JSON.parse(String(reader.result)) }; this.save(); } catch { alert('That backup file is not valid.'); } }; reader.readAsText(file); }
   scroll(id: string): void { document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }); this.menuOpen.set(false); }
+  heroSlides(): GalleryItem[] { return this.content().heroImages?.length ? this.content().heroImages : defaults.heroImages; }
+  nextHero(): void { const length=this.heroSlides().length; this.heroIndex.set(length ? (this.heroIndex()+1)%length : 0); }
+  setHero(index: number): void { this.heroIndex.set(index); }
+  displayAlbums(): GalleryAlbum[] { return this.content().albums?.length ? this.content().albums : [{ title: 'School Life', description: '', images: this.content().gallery || [] }]; }
   sendEnquiry(): void { const phone = this.content().phone.replace(/\D/g, '').slice(0, 10); const message = `Admission enquiry\nParent: ${this.enquiry.parent}\nChild: ${this.enquiry.child}\nClass: ${this.enquiry.className}\nPhone: ${this.enquiry.phone}`; window.open(`https://wa.me/91${phone}?text=${encodeURIComponent(message)}`, '_blank', 'noopener'); }
   async signIn(): Promise<void> { if (this.apiBase) { try { const response = await fetch(`${this.apiBase}/api/login/`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(this.login) }); if (!response.ok) throw new Error(); const result = await response.json() as { token: string }; this.token = result.token; sessionStorage.setItem('dca-api-token', this.token); this.isAdmin.set(true); this.loginError.set(''); return; } catch { this.loginError.set('Incorrect username or password.'); return; } } if (this.login.username === 'admin' && this.login.password === 'DCA@2026!') { this.isAdmin.set(true); this.loginError.set(''); sessionStorage.setItem('dca-admin-session', 'active'); this.login = { username: '', password: '' }; } else { this.loginError.set('Incorrect username or password.'); } }
   signOut(): void { sessionStorage.removeItem('dca-admin-session'); sessionStorage.removeItem('dca-api-token'); this.token=''; this.isAdmin.set(false); this.closeAdmin(); }
-  async uploadGallery(event: Event): Promise<void> { const file=(event.target as HTMLInputElement).files?.[0]; if (!file) return; if (!this.apiBase) { alert('Configure the Django API URL before uploading images. You can still paste an image URL below.'); return; } const form=new FormData(); form.append('image',file); form.append('title',file.name.replace(/\.[^.]+$/,'')); const response=await fetch(`${this.apiBase}/api/gallery/upload/`,{method:'POST',headers:{Authorization:`Bearer ${this.token}`},body:form}); if(!response.ok){alert('Upload failed. Please sign in again.');return;} const item=await response.json() as GalleryItem; this.draft.gallery.push(item); }
+  addHeroSlide(): void { this.draft.heroImages.push({ title: 'New hero image', image: '' }); }
+  removeHeroSlide(index: number): void { if (this.draft.heroImages.length > 1) this.draft.heroImages.splice(index, 1); }
+  addAlbum(): void { this.draft.albums.push({ title: 'New album', description: '', images: [] }); }
+  removeAlbum(index: number): void { if (confirm('Remove this album and its image links?')) this.draft.albums.splice(index, 1); }
+  removeAlbumImage(albumIndex: number, imageIndex: number): void { this.draft.albums[albumIndex].images.splice(imageIndex, 1); }
+  private async uploadFile(file: File): Promise<GalleryItem | null> { if (!this.apiBase) return null; const form=new FormData(); form.append('image',file); form.append('title',file.name.replace(/\.[^.]+$/,'')); const response=await fetch(`${this.apiBase}/api/gallery/upload/`,{method:'POST',headers:{Authorization:`Bearer ${this.token}`},body:form}); return response.ok ? await response.json() as GalleryItem : null; }
+  async uploadHeroImages(event: Event): Promise<void> { const input=event.target as HTMLInputElement; for (const file of Array.from(input.files || [])) { const item=await this.uploadFile(file); if (item) this.draft.heroImages.push(item); } input.value=''; }
+  async uploadAlbumImages(event: Event, albumIndex: number): Promise<void> { const input=event.target as HTMLInputElement; for (const file of Array.from(input.files || [])) { const item=await this.uploadFile(file); if (item) this.draft.albums[albumIndex].images.push(item); } input.value=''; }
 }

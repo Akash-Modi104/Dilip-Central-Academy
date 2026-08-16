@@ -12,12 +12,15 @@
 
 <main>
   <section id="home" class="hero">
-    <img src="assets/prospectus-cover.jpeg" alt="Dilip Central Academy school building">
+    <div class="hero-slides">
+      <img *ngFor="let slide of heroSlides(); let i = index" class="hero-slide" [class.active]="i === heroIndex()" [src]="slide.image" [alt]="slide.title">
+    </div>
     <div class="hero-shade"></div>
     <div class="hero-content">
       <span class="eyebrow">{{ content().since }}</span><h1>{{ content().heroTitle }}</h1><p>{{ content().heroText }}</p>
       <div class="hero-actions"><button class="primary" (click)="scroll('contact')">Enquire for admission</button><button class="ghost" (click)="scroll('about')">Explore our school</button></div>
     </div>
+    <div class="hero-dots" *ngIf="heroSlides().length > 1"><button *ngFor="let slide of heroSlides(); let i = index" [class.active]="i === heroIndex()" (click)="setHero(i)" [attr.aria-label]="'Show ' + slide.title"></button></div>
     <div class="notice"><span>Latest notice</span><p>{{ content().notice }}</p></div>
   </section>
 
@@ -48,7 +51,10 @@
 
   <section id="gallery" class="section gallery">
     <div class="section-heading"><span class="kicker">Life at school</span><h2>Moments that shape memories</h2><p>From recognition and cultural programmes to exhibitions and school functions.</p></div>
-    <div class="gallery-grid"><figure *ngFor="let activity of content().gallery"><img [src]="activity.image" [alt]="activity.title"><figcaption>{{ activity.title }}</figcaption></figure></div>
+    <div class="album-block" *ngFor="let album of displayAlbums()">
+      <div class="album-heading"><h3>{{ album.title }}</h3><p *ngIf="album.description">{{ album.description }}</p></div>
+      <div class="gallery-grid"><figure *ngFor="let activity of album.images"><img [src]="activity.image" [alt]="activity.title"><figcaption>{{ activity.title }}</figcaption></figure></div>
+    </div>
   </section>
 
   <section id="contact" class="contact">
@@ -71,6 +77,7 @@
       <label>School name<input [(ngModel)]="draft.schoolName"></label><label>Tagline<input [(ngModel)]="draft.tagline"></label>
       <label>Since line<input [(ngModel)]="draft.since"></label><label>Phone numbers<input [(ngModel)]="draft.phone"></label>
       <label class="wide">Hero headline<input [(ngModel)]="draft.heroTitle"></label><label class="wide">Hero introduction<textarea [(ngModel)]="draft.heroText"></textarea></label>
+      <div class="wide admin-section"><div class="admin-section-head"><h3>Top hero slider</h3><button type="button" (click)="addHeroSlide()">+ Add image URL</button></div><p>These large images change automatically every five seconds.</p><div class="editor-row" *ngFor="let item of draft.heroImages; let i = index"><input [(ngModel)]="item.title" aria-label="Hero image title" placeholder="Image title"><input [(ngModel)]="item.image" aria-label="Hero image URL" placeholder="Image URL"><button type="button" class="remove-item" (click)="removeHeroSlide(i)" [disabled]="draft.heroImages.length === 1">Remove</button></div><label class="file multi-upload">Upload multiple hero images<input type="file" accept="image/*" multiple (change)="uploadHeroImages($event)"></label></div>
       <label class="wide">Latest notice<textarea [(ngModel)]="draft.notice"></textarea></label><label>Contact email<input type="email" [(ngModel)]="draft.email"></label>
       <label>Address<input [(ngModel)]="draft.address"></label><label class="wide">Google Maps link<input [(ngModel)]="draft.mapLink"></label>
       <label class="wide">About heading<input [(ngModel)]="draft.aboutTitle"></label><label class="wide">About text<textarea [(ngModel)]="draft.aboutText"></textarea></label>
@@ -82,8 +89,7 @@
       <div class="wide document-edit"><h3>Admission documents</h3><input *ngFor="let item of draft.admissionDocuments; let i = index" [(ngModel)]="draft.admissionDocuments[i]" aria-label="Required document"></div>
       <label class="wide">Student development heading<input [(ngModel)]="draft.resourcesTitle"></label>
       <div class="wide notice-edit"><h3>Student development cards</h3><div *ngFor="let item of draft.resources"><input [(ngModel)]="item.title" aria-label="Resource title"><textarea [(ngModel)]="item.detail" aria-label="Resource details"></textarea></div></div>
-      <div class="wide gallery-edit"><h3>Gallery details</h3><div *ngFor="let item of draft.gallery"><input [(ngModel)]="item.title" aria-label="Gallery title"><input [(ngModel)]="item.image" aria-label="Gallery image URL"></div></div>
-      <label class="wide file">Upload gallery image<input type="file" accept="image/*" (change)="uploadGallery($event)"></label>
+      <div class="wide admin-section album-manager"><div class="admin-section-head"><h3>Gallery albums</h3><button type="button" (click)="addAlbum()">+ Create album</button></div><div class="album-editor" *ngFor="let album of draft.albums; let albumIndex = index"><div class="album-title-row"><input [(ngModel)]="album.title" aria-label="Album title" placeholder="Album title"><button type="button" class="remove-item" (click)="removeAlbum(albumIndex)">Delete album</button></div><textarea [(ngModel)]="album.description" aria-label="Album description" placeholder="Album description"></textarea><div class="editor-row" *ngFor="let item of album.images; let imageIndex = index"><input [(ngModel)]="item.title" aria-label="Album image title" placeholder="Image title"><input [(ngModel)]="item.image" aria-label="Album image URL" placeholder="Image URL"><button type="button" class="remove-item" (click)="removeAlbumImage(albumIndex, imageIndex)">Remove</button></div><label class="file multi-upload">Add multiple images<input type="file" accept="image/*" multiple (change)="uploadAlbumImages($event, albumIndex)"></label></div></div>
       <div class="wide notice-edit"><h3>Notice board</h3><div *ngFor="let item of draft.notices"><input [(ngModel)]="item.date" aria-label="Notice label"><input [(ngModel)]="item.title" aria-label="Notice title"><textarea [(ngModel)]="item.detail" aria-label="Notice details"></textarea></div></div>
     </div>
     <div class="admin-actions"><button class="danger" (click)="signOut()">Sign out</button><button class="danger" (click)="reset()">Reset</button><label class="file">Import backup<input type="file" accept="application/json" (change)="importData($event)"></label><button (click)="exportData()">Export backup</button><button class="primary" (click)="save()">{{ saved() ? 'Saved ✓' : 'Save changes' }}</button></div>
