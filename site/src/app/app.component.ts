@@ -91,24 +91,24 @@ export class AppComponent implements OnDestroy {
   private token = sessionStorage.getItem('dca-api-token') || '';
   content = signal<Content>(this.load());
   draft: Content = structuredClone(this.content());
-  adminOpen = signal(false); menuOpen = signal(false); saved = signal(false);
+  adminOpen = signal(window.location.pathname.replace(/\/+$/, '') === '/admin-studio'); menuOpen = signal(false); saved = signal(false);
   nightMode = signal(localStorage.getItem('dca-theme') === 'night');
   heroIndex = signal(0);
   noticeIndex = signal(0);
-  isAdmin = signal(sessionStorage.getItem('dca-admin-session') === 'active' || !!sessionStorage.getItem('dca-api-token'));
+  isAdmin = signal(!!sessionStorage.getItem('dca-api-token'));
   login = { username: '', password: '' }; loginError = signal('');
   mapUrl: SafeResourceUrl;
   enquiry = { parent: '', child: '', className: '', phone: '' };
   private heroTimer = window.setInterval(() => this.nextHero(), 5000);
   private noticeTimer = window.setInterval(() => this.nextNotice(), 4500);
-  constructor(private sanitizer: DomSanitizer) { this.mapUrl = this.makeMapUrl(); void this.loadRemote(); }
+  constructor(private sanitizer: DomSanitizer) { this.mapUrl = this.makeMapUrl(); if (this.adminOpen()) { document.body.classList.add('modal-open'); document.querySelector('meta[name="robots"]')?.setAttribute('content', 'noindex, nofollow, noarchive'); } void this.loadRemote(); }
   ngOnDestroy(): void { window.clearInterval(this.heroTimer); window.clearInterval(this.noticeTimer); }
   private mergeContent(data: Partial<Content>): Content { const legacyImages=data.gallery?.length ? data.gallery : defaults.gallery; return { ...defaults, ...data, heroImages: data.heroImages?.length ? data.heroImages : defaults.heroImages, albums: data.albums?.length ? data.albums : [{ title: 'School Life', description: defaults.albums[0].description, images: legacyImages }] }; }
   private async loadRemote(): Promise<void> { if (!this.apiBase) return; try { const response = await fetch(`${this.apiBase}/api/content/`); if (!response.ok) return; const result = await response.json() as { data?: Partial<Content> }; if (result.data && Object.keys(result.data).length) { const next = this.mergeContent(result.data); this.content.set(next); this.draft = structuredClone(next); } } catch { /* remain usable offline */ } }
   private load(): Content { try { return this.mergeContent(JSON.parse(localStorage.getItem(this.key) || '{}')); } catch { return defaults; } }
   private makeMapUrl(): SafeResourceUrl { return this.sanitizer.bypassSecurityTrustResourceUrl('https://www.google.com/maps?q=23.8025032,85.465326&z=16&output=embed'); }
   openAdmin(): void { this.draft = structuredClone(this.content()); this.adminOpen.set(true); document.body.classList.add('modal-open'); }
-  closeAdmin(): void { this.adminOpen.set(false); document.body.classList.remove('modal-open'); }
+  closeAdmin(): void { this.adminOpen.set(false); document.body.classList.remove('modal-open'); if (window.location.pathname.startsWith('/admin-studio')) window.history.replaceState(null, '', '/'); }
   async save(): Promise<void> { if (this.apiBase) { const response = await fetch(`${this.apiBase}/api/content/`, { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${this.token}` }, body: JSON.stringify({ data: this.draft }) }); if (!response.ok) { alert('Could not save to the server. Please sign in again.'); return; } } this.content.set(structuredClone(this.draft)); localStorage.setItem(this.key, JSON.stringify(this.draft)); this.saved.set(true); setTimeout(() => this.saved.set(false), 1800); }
   reset(): void { if (confirm('Reset all editable content to the original school information?')) { this.draft = structuredClone(defaults); this.save(); } }
   exportData(): void { const blob = new Blob([JSON.stringify(this.content(), null, 2)], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'dca-site-backup.json'; a.click(); URL.revokeObjectURL(a.href); }
@@ -127,7 +127,7 @@ export class AppComponent implements OnDestroy {
   previousNotice(): void { const length=this.noticeItems().length; this.noticeIndex.set(length ? (this.noticeIndex()-1+length)%length : 0); }
   setNotice(index: number): void { this.noticeIndex.set(index); }
   sendEnquiry(): void { const phone = this.content().phone.replace(/\D/g, '').slice(0, 10); const message = `Admission enquiry\nParent: ${this.enquiry.parent}\nChild: ${this.enquiry.child}\nClass: ${this.enquiry.className}\nPhone: ${this.enquiry.phone}`; window.open(`https://wa.me/91${phone}?text=${encodeURIComponent(message)}`, '_blank', 'noopener'); }
-  async signIn(): Promise<void> { if (this.apiBase) { try { const response = await fetch(`${this.apiBase}/api/login/`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(this.login) }); if (!response.ok) throw new Error(); const result = await response.json() as { token: string }; this.token = result.token; sessionStorage.setItem('dca-api-token', this.token); this.isAdmin.set(true); this.loginError.set(''); return; } catch { this.loginError.set('Incorrect username or password.'); return; } } if (this.login.username === 'admin' && this.login.password === 'DCA@2026!') { this.isAdmin.set(true); this.loginError.set(''); sessionStorage.setItem('dca-admin-session', 'active'); this.login = { username: '', password: '' }; } else { this.loginError.set('Incorrect username or password.'); } }
+  async signIn(): Promise<void> { if (!this.apiBase) { this.loginError.set('Admin service is unavailable. Please try again shortly.'); return; } try { const response = await fetch(`${this.apiBase}/api/login/`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(this.login) }); if (response.status === 429) { this.loginError.set('Too many attempts. Please wait 15 minutes and try again.'); return; } if (!response.ok) throw new Error(); const result = await response.json() as { token: string }; this.token = result.token; sessionStorage.setItem('dca-api-token', this.token); this.isAdmin.set(true); this.loginError.set(''); this.login = { username: '', password: '' }; } catch { this.loginError.set('Incorrect username or password.'); } }
   signOut(): void { sessionStorage.removeItem('dca-admin-session'); sessionStorage.removeItem('dca-api-token'); this.token=''; this.isAdmin.set(false); this.closeAdmin(); }
   addHeroSlide(): void { this.draft.heroImages.push({ title: 'New hero image', image: '' }); }
   removeHeroSlide(index: number): void { if (this.draft.heroImages.length > 1) this.draft.heroImages.splice(index, 1); }
