@@ -88,6 +88,15 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': os.environ.get('DJANGO_CACHE_DIR', '/tmp/dca-django-cache'),
+        'TIMEOUT': 15 * 60,
+        'OPTIONS': {'MAX_ENTRIES': 5000},
+    }
+}
+
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
 X_FRAME_OPTIONS = 'DENY'
