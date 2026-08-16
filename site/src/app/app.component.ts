@@ -3,7 +3,7 @@ import { Component, OnDestroy, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
-type Notice = { date: string; title: string; detail: string };
+type Notice = { date: string; title: string; detail: string; highlighted?: boolean };
 type GalleryItem = { title: string; image: string };
 type GalleryAlbum = { title: string; description: string; images: GalleryItem[] };
 type Achiever = { name: string; achievement: string; image: string };
@@ -50,7 +50,7 @@ const defaults: Content = {
     { title: 'Exhibitions', detail: 'Hands-on learning and presentation of student work.' }
   ],
   notices: [
-    { date: 'Admissions', title: 'Admission enquiries open', detail: 'Contact the school office for class availability and current eligibility.' },
+    { date: 'Admissions', title: 'Admission enquiries open', detail: 'Contact the school office for class availability and current eligibility.', highlighted: true },
     { date: 'Uniform', title: 'Wednesday & Saturday', detail: 'White uniform with house T-shirt (all white) is mandatory.' }
   ],
   gallery: [
@@ -92,13 +92,15 @@ export class AppComponent implements OnDestroy {
   draft: Content = structuredClone(this.content());
   adminOpen = signal(false); menuOpen = signal(false); saved = signal(false);
   heroIndex = signal(0);
+  noticeIndex = signal(0);
   isAdmin = signal(sessionStorage.getItem('dca-admin-session') === 'active' || !!sessionStorage.getItem('dca-api-token'));
   login = { username: '', password: '' }; loginError = signal('');
   mapUrl: SafeResourceUrl;
   enquiry = { parent: '', child: '', className: '', phone: '' };
   private heroTimer = window.setInterval(() => this.nextHero(), 5000);
+  private noticeTimer = window.setInterval(() => this.nextNotice(), 4500);
   constructor(private sanitizer: DomSanitizer) { this.mapUrl = this.makeMapUrl(); void this.loadRemote(); }
-  ngOnDestroy(): void { window.clearInterval(this.heroTimer); }
+  ngOnDestroy(): void { window.clearInterval(this.heroTimer); window.clearInterval(this.noticeTimer); }
   private mergeContent(data: Partial<Content>): Content { const legacyImages=data.gallery?.length ? data.gallery : defaults.gallery; return { ...defaults, ...data, heroImages: data.heroImages?.length ? data.heroImages : defaults.heroImages, albums: data.albums?.length ? data.albums : [{ title: 'School Life', description: defaults.albums[0].description, images: legacyImages }] }; }
   private async loadRemote(): Promise<void> { if (!this.apiBase) return; try { const response = await fetch(`${this.apiBase}/api/content/`); if (!response.ok) return; const result = await response.json() as { data?: Partial<Content> }; if (result.data && Object.keys(result.data).length) { const next = this.mergeContent(result.data); this.content.set(next); this.draft = structuredClone(next); } } catch { /* remain usable offline */ } }
   private load(): Content { try { return this.mergeContent(JSON.parse(localStorage.getItem(this.key) || '{}')); } catch { return defaults; } }
@@ -114,6 +116,13 @@ export class AppComponent implements OnDestroy {
   nextHero(): void { const length=this.heroSlides().length; this.heroIndex.set(length ? (this.heroIndex()+1)%length : 0); }
   setHero(index: number): void { this.heroIndex.set(index); }
   displayAlbums(): GalleryAlbum[] { return this.content().albums?.length ? this.content().albums : [{ title: 'School Life', description: '', images: this.content().gallery || [] }]; }
+  noticeItems(): Notice[] { return this.content().notices || []; }
+  currentNoticeIndex(): number { const length=this.noticeItems().length; return length ? this.noticeIndex()%length : 0; }
+  activeNotice(): Notice | null { const items=this.noticeItems(); return items.length ? items[this.currentNoticeIndex()] : null; }
+  upcomingNotice(): Notice | null { const items=this.noticeItems(); return items.length > 1 ? items[(this.currentNoticeIndex()+1)%items.length] : null; }
+  nextNotice(): void { const length=this.noticeItems().length; this.noticeIndex.set(length ? (this.noticeIndex()+1)%length : 0); }
+  previousNotice(): void { const length=this.noticeItems().length; this.noticeIndex.set(length ? (this.noticeIndex()-1+length)%length : 0); }
+  setNotice(index: number): void { this.noticeIndex.set(index); }
   sendEnquiry(): void { const phone = this.content().phone.replace(/\D/g, '').slice(0, 10); const message = `Admission enquiry\nParent: ${this.enquiry.parent}\nChild: ${this.enquiry.child}\nClass: ${this.enquiry.className}\nPhone: ${this.enquiry.phone}`; window.open(`https://wa.me/91${phone}?text=${encodeURIComponent(message)}`, '_blank', 'noopener'); }
   async signIn(): Promise<void> { if (this.apiBase) { try { const response = await fetch(`${this.apiBase}/api/login/`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(this.login) }); if (!response.ok) throw new Error(); const result = await response.json() as { token: string }; this.token = result.token; sessionStorage.setItem('dca-api-token', this.token); this.isAdmin.set(true); this.loginError.set(''); return; } catch { this.loginError.set('Incorrect username or password.'); return; } } if (this.login.username === 'admin' && this.login.password === 'DCA@2026!') { this.isAdmin.set(true); this.loginError.set(''); sessionStorage.setItem('dca-admin-session', 'active'); this.login = { username: '', password: '' }; } else { this.loginError.set('Incorrect username or password.'); } }
   signOut(): void { sessionStorage.removeItem('dca-admin-session'); sessionStorage.removeItem('dca-api-token'); this.token=''; this.isAdmin.set(false); this.closeAdmin(); }
@@ -122,7 +131,7 @@ export class AppComponent implements OnDestroy {
   addAlbum(): void { this.draft.albums.push({ title: 'New album', description: '', images: [] }); }
   removeAlbum(index: number): void { if (confirm('Remove this album and its image links?')) this.draft.albums.splice(index, 1); }
   removeAlbumImage(albumIndex: number, imageIndex: number): void { this.draft.albums[albumIndex].images.splice(imageIndex, 1); }
-  addNotice(): void { this.draft.notices.push({ date: 'New', title: 'New notice', detail: 'Add notice details here.' }); }
+  addNotice(): void { this.draft.notices.push({ date: 'New', title: 'New notice', detail: 'Add notice details here.', highlighted: false }); }
   removeNotice(index: number): void { this.draft.notices.splice(index, 1); }
   addAchiever(): void { this.draft.achievers.push({ name: 'New achiever', achievement: 'Add achievement details.', image: '' }); }
   removeAchiever(index: number): void { this.draft.achievers.splice(index, 1); }
