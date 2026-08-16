@@ -87,7 +87,7 @@ export class AppComponent implements OnDestroy {
   private heroTimer = window.setInterval(() => this.nextHero(), 5000);
   constructor(private sanitizer: DomSanitizer) { this.mapUrl = this.makeMapUrl(); void this.loadRemote(); }
   ngOnDestroy(): void { window.clearInterval(this.heroTimer); }
-  private mergeContent(data: Partial<Content>): Content { return { ...defaults, ...data, heroImages: data.heroImages?.length ? data.heroImages : defaults.heroImages, albums: data.albums?.length ? data.albums : defaults.albums }; }
+  private mergeContent(data: Partial<Content>): Content { const legacyImages=data.gallery?.length ? data.gallery : defaults.gallery; return { ...defaults, ...data, heroImages: data.heroImages?.length ? data.heroImages : defaults.heroImages, albums: data.albums?.length ? data.albums : [{ title: 'School Life', description: defaults.albums[0].description, images: legacyImages }] }; }
   private async loadRemote(): Promise<void> { if (!this.apiBase) return; try { const response = await fetch(`${this.apiBase}/api/content/`); if (!response.ok) return; const result = await response.json() as { data?: Partial<Content> }; if (result.data && Object.keys(result.data).length) { const next = this.mergeContent(result.data); this.content.set(next); this.draft = structuredClone(next); } } catch { /* remain usable offline */ } }
   private load(): Content { try { return this.mergeContent(JSON.parse(localStorage.getItem(this.key) || '{}')); } catch { return defaults; } }
   private makeMapUrl(): SafeResourceUrl { return this.sanitizer.bypassSecurityTrustResourceUrl('https://www.google.com/maps?q=23.8025032,85.465326&z=16&output=embed'); }
