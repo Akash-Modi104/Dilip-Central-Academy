@@ -82,7 +82,8 @@ const defaults: Content = {
 
 @Component({
   selector: 'app-root', standalone: true, imports: [CommonModule, FormsModule],
-  templateUrl: './app.component.html', styleUrl: './app.component.css'
+  templateUrl: './app.component.html', styleUrl: './app.component.css',
+  host: { '[class.night-mode]': 'nightMode()' }
 })
 export class AppComponent implements OnDestroy {
   private key = 'dca-site-content-v1';
@@ -91,6 +92,7 @@ export class AppComponent implements OnDestroy {
   content = signal<Content>(this.load());
   draft: Content = structuredClone(this.content());
   adminOpen = signal(false); menuOpen = signal(false); saved = signal(false);
+  nightMode = signal(localStorage.getItem('dca-theme') === 'night');
   heroIndex = signal(0);
   noticeIndex = signal(0);
   isAdmin = signal(sessionStorage.getItem('dca-admin-session') === 'active' || !!sessionStorage.getItem('dca-api-token'));
@@ -112,6 +114,7 @@ export class AppComponent implements OnDestroy {
   exportData(): void { const blob = new Blob([JSON.stringify(this.content(), null, 2)], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'dca-site-backup.json'; a.click(); URL.revokeObjectURL(a.href); }
   importData(event: Event): void { const input = event.target as HTMLInputElement; const file = input.files?.[0]; if (!file) return; const reader = new FileReader(); reader.onload = () => { try { this.draft = { ...defaults, ...JSON.parse(String(reader.result)) }; this.save(); } catch { alert('That backup file is not valid.'); } }; reader.readAsText(file); }
   scroll(id: string): void { document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }); this.menuOpen.set(false); }
+  toggleTheme(): void { const next=!this.nightMode(); this.nightMode.set(next); localStorage.setItem('dca-theme', next ? 'night' : 'day'); }
   heroSlides(): GalleryItem[] { return this.content().heroImages?.length ? this.content().heroImages : defaults.heroImages; }
   nextHero(): void { const length=this.heroSlides().length; this.heroIndex.set(length ? (this.heroIndex()+1)%length : 0); }
   setHero(index: number): void { this.heroIndex.set(index); }
