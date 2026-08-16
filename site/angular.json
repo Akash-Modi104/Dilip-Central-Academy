@@ -15,7 +15,7 @@
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
             "assets": [{ "glob": "**/*", "input": "public" }],
-            "styles": ["src/styles.css", "src/admin.css"],
+            "styles": ["src/styles.css", "src/sections.css", "src/admin.css"],
             "outputPath": "dist/dilip-central-academy"
           },
           "configurations": {

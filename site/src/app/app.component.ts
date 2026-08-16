@@ -6,6 +6,7 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 type Notice = { date: string; title: string; detail: string };
 type GalleryItem = { title: string; image: string };
 type GalleryAlbum = { title: string; description: string; images: GalleryItem[] };
+type Achiever = { name: string; achievement: string; image: string };
 type InfoCard = { title: string; detail: string };
 type Content = {
   schoolName: string; tagline: string; since: string; heroTitle: string; heroText: string;
@@ -14,6 +15,8 @@ type Content = {
   logo: string; learningTitle: string; facilities: InfoCard[]; admissionsTitle: string; admissionsText: string;
   admissionSteps: InfoCard[]; admissionDocuments: string[]; resourcesTitle: string; resources: InfoCard[];
   heroImages: GalleryItem[]; albums: GalleryAlbum[];
+  noticeBoardTitle: string; visionTitle: string; visionText: string; missionTitle: string; missionText: string;
+  achieversTitle: string; achievers: Achiever[];
 };
 
 const defaults: Content = {
@@ -66,6 +69,15 @@ const defaults: Content = {
       { title: 'School Function & Rangoli', image: 'assets/prospectus-12.jpeg' }, { title: 'Excursion & Champions', image: 'assets/prospectus-9.jpeg' }
     ]
   }],
+  noticeBoardTitle: 'Important updates for our school community',
+  visionTitle: 'Our Vision', visionText: 'To care for young minds and guide every learner toward excellence, confidence and responsible citizenship.',
+  missionTitle: 'Our Mission', missionText: 'To spread quality education through strong academics, discipline, creativity, wellbeing and opportunities for every child to grow.',
+  achieversTitle: 'Celebrating our achievers',
+  achievers: [
+    { name: 'Recognition Champions', achievement: 'Students recognised for excellence in academics and co-curricular activities.', image: 'assets/prospectus-10.jpeg' },
+    { name: 'Competition Champions', achievement: 'Young learners building confidence through competitions, exhibitions and school programmes.', image: 'assets/prospectus-9.jpeg' },
+    { name: 'Creative Achievers', achievement: 'Students expressing their talents through drama, singing and cultural activities.', image: 'assets/prospectus-13.jpeg' }
+  ],
 };
 
 @Component({
@@ -110,6 +122,10 @@ export class AppComponent implements OnDestroy {
   addAlbum(): void { this.draft.albums.push({ title: 'New album', description: '', images: [] }); }
   removeAlbum(index: number): void { if (confirm('Remove this album and its image links?')) this.draft.albums.splice(index, 1); }
   removeAlbumImage(albumIndex: number, imageIndex: number): void { this.draft.albums[albumIndex].images.splice(imageIndex, 1); }
+  addNotice(): void { this.draft.notices.push({ date: 'New', title: 'New notice', detail: 'Add notice details here.' }); }
+  removeNotice(index: number): void { this.draft.notices.splice(index, 1); }
+  addAchiever(): void { this.draft.achievers.push({ name: 'New achiever', achievement: 'Add achievement details.', image: '' }); }
+  removeAchiever(index: number): void { this.draft.achievers.splice(index, 1); }
   private async uploadFile(file: File): Promise<GalleryItem | null> { if (!this.apiBase) return null; const form=new FormData(); form.append('image',file); form.append('title',file.name.replace(/\.[^.]+$/,'')); const response=await fetch(`${this.apiBase}/api/gallery/upload/`,{method:'POST',headers:{Authorization:`Bearer ${this.token}`},body:form}); return response.ok ? await response.json() as GalleryItem : null; }
   async uploadHeroImages(event: Event): Promise<void> { const input=event.target as HTMLInputElement; for (const file of Array.from(input.files || [])) { const item=await this.uploadFile(file); if (item) this.draft.heroImages.push(item); } input.value=''; }
   async uploadAlbumImages(event: Event, albumIndex: number): Promise<void> { const input=event.target as HTMLInputElement; for (const file of Array.from(input.files || [])) { const item=await this.uploadFile(file); if (item) this.draft.albums[albumIndex].images.push(item); } input.value=''; }

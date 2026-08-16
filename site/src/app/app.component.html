@@ -29,14 +29,22 @@
     <div class="quote"><span>“</span><p>{{ content().principalMessage }}</p><strong>— School leadership</strong></div>
   </section>
 
+  <section class="section purpose-section">
+    <article class="purpose-card vision-card"><span>01 · Direction</span><h2>{{ content().visionTitle }}</h2><p>{{ content().visionText }}</p></article>
+    <article class="purpose-card mission-card"><span>02 · Commitment</span><h2>{{ content().missionTitle }}</h2><p>{{ content().missionText }}</p></article>
+  </section>
+
   <section id="learning" class="section learning">
     <div class="section-heading"><span class="kicker">The DCA experience</span><h2>{{ content().learningTitle }}</h2></div>
     <div class="feature-grid"><article *ngFor="let item of content().facilities; let i = index"><span>0{{ i + 1 }}</span><h3>{{ item.title }}</h3><p>{{ item.detail }}</p></article></div>
   </section>
 
-  <section class="section updates">
-    <div><span class="kicker">Notice board</span><h2>What families need to know</h2></div>
-    <div class="notice-grid"><article *ngFor="let item of content().notices"><span>{{ item.date }}</span><h3>{{ item.title }}</h3><p>{{ item.detail }}</p></article></div>
+  <section class="section notice-showcase">
+    <div class="notice-title"><div><span class="live-pill"><i></i> Live updates</span><h2>{{ content().noticeBoardTitle }}</h2></div><span class="notice-mark">DCA</span></div>
+    <div class="notice-stage" *ngIf="content().notices.length">
+      <article class="notice-feature"><span>{{ content().notices[0].date }}</span><h3>{{ content().notices[0].title }}</h3><p>{{ content().notices[0].detail }}</p></article>
+      <div class="notice-stack"><article *ngFor="let item of content().notices.slice(1)"><span>{{ item.date }}</span><div><h3>{{ item.title }}</h3><p>{{ item.detail }}</p></div></article></div>
+    </div>
   </section>
 
   <section id="admissions" class="section admissions">
@@ -47,6 +55,11 @@
   <section class="section resources">
     <div class="section-heading"><span class="kicker">Student development</span><h2>{{ content().resourcesTitle }}</h2></div>
     <div class="resource-grid"><article *ngFor="let resource of content().resources"><h3>{{ resource.title }}</h3><p>{{ resource.detail }}</p></article></div>
+  </section>
+
+  <section class="section achievers-section">
+    <div class="section-heading"><span class="kicker">DCA pride</span><h2>{{ content().achieversTitle }}</h2><p>Honouring effort, confidence and the many talents of our students.</p></div>
+    <div class="achiever-grid"><article *ngFor="let achiever of content().achievers"><div class="achiever-photo"><img *ngIf="achiever.image" [src]="achiever.image" [alt]="achiever.name"><span *ngIf="!achiever.image">★</span></div><div><small>Achievement spotlight</small><h3>{{ achiever.name }}</h3><p>{{ achiever.achievement }}</p></div></article></div>
   </section>
 
   <section id="gallery" class="section gallery">
@@ -82,6 +95,8 @@
       <label>Address<input [(ngModel)]="draft.address"></label><label class="wide">Google Maps link<input [(ngModel)]="draft.mapLink"></label>
       <label class="wide">About heading<input [(ngModel)]="draft.aboutTitle"></label><label class="wide">About text<textarea [(ngModel)]="draft.aboutText"></textarea></label>
       <label class="wide">Leadership message<textarea [(ngModel)]="draft.principalMessage"></textarea></label>
+      <label>Vision heading<input [(ngModel)]="draft.visionTitle"></label><label>Mission heading<input [(ngModel)]="draft.missionTitle"></label>
+      <label class="wide">Vision text<textarea [(ngModel)]="draft.visionText"></textarea></label><label class="wide">Mission text<textarea [(ngModel)]="draft.missionText"></textarea></label>
       <label class="wide">Logo image URL<input [(ngModel)]="draft.logo"></label><label class="wide">Learning section heading<input [(ngModel)]="draft.learningTitle"></label>
       <div class="wide notice-edit"><h3>Learning cards</h3><div *ngFor="let item of draft.facilities"><input [(ngModel)]="item.title" aria-label="Learning title"><textarea [(ngModel)]="item.detail" aria-label="Learning details"></textarea></div></div>
       <label class="wide">Admissions heading<input [(ngModel)]="draft.admissionsTitle"></label><label class="wide">Admissions introduction<textarea [(ngModel)]="draft.admissionsText"></textarea></label>
@@ -89,8 +104,9 @@
       <div class="wide document-edit"><h3>Admission documents</h3><input *ngFor="let item of draft.admissionDocuments; let i = index" [(ngModel)]="draft.admissionDocuments[i]" aria-label="Required document"></div>
       <label class="wide">Student development heading<input [(ngModel)]="draft.resourcesTitle"></label>
       <div class="wide notice-edit"><h3>Student development cards</h3><div *ngFor="let item of draft.resources"><input [(ngModel)]="item.title" aria-label="Resource title"><textarea [(ngModel)]="item.detail" aria-label="Resource details"></textarea></div></div>
+      <div class="wide admin-section"><div class="admin-section-head"><h3>Achievers section</h3><button type="button" (click)="addAchiever()">+ Add achiever</button></div><label>Section heading<input [(ngModel)]="draft.achieversTitle"></label><div class="editor-row achiever-editor" *ngFor="let item of draft.achievers; let i = index"><input [(ngModel)]="item.name" aria-label="Achiever name" placeholder="Name or team"><input [(ngModel)]="item.image" aria-label="Achiever image URL" placeholder="Image URL"><textarea [(ngModel)]="item.achievement" aria-label="Achievement details" placeholder="Achievement details"></textarea><button type="button" class="remove-item" (click)="removeAchiever(i)">Remove</button></div></div>
       <div class="wide admin-section album-manager"><div class="admin-section-head"><h3>Gallery albums</h3><button type="button" (click)="addAlbum()">+ Create album</button></div><div class="album-editor" *ngFor="let album of draft.albums; let albumIndex = index"><div class="album-title-row"><input [(ngModel)]="album.title" aria-label="Album title" placeholder="Album title"><button type="button" class="remove-item" (click)="removeAlbum(albumIndex)">Delete album</button></div><textarea [(ngModel)]="album.description" aria-label="Album description" placeholder="Album description"></textarea><div class="editor-row" *ngFor="let item of album.images; let imageIndex = index"><input [(ngModel)]="item.title" aria-label="Album image title" placeholder="Image title"><input [(ngModel)]="item.image" aria-label="Album image URL" placeholder="Image URL"><button type="button" class="remove-item" (click)="removeAlbumImage(albumIndex, imageIndex)">Remove</button></div><label class="file multi-upload">Add multiple images<input type="file" accept="image/*" multiple (change)="uploadAlbumImages($event, albumIndex)"></label></div></div>
-      <div class="wide notice-edit"><h3>Notice board</h3><div *ngFor="let item of draft.notices"><input [(ngModel)]="item.date" aria-label="Notice label"><input [(ngModel)]="item.title" aria-label="Notice title"><textarea [(ngModel)]="item.detail" aria-label="Notice details"></textarea></div></div>
+      <div class="wide admin-section notice-manager"><div class="admin-section-head"><h3>Flashy notice board</h3><button type="button" (click)="addNotice()">+ Add notice</button></div><label>Section heading<input [(ngModel)]="draft.noticeBoardTitle"></label><div class="editor-row notice-admin-row" *ngFor="let item of draft.notices; let i = index"><input [(ngModel)]="item.date" aria-label="Notice label" placeholder="Label or date"><input [(ngModel)]="item.title" aria-label="Notice title" placeholder="Notice title"><textarea [(ngModel)]="item.detail" aria-label="Notice details" placeholder="Notice details"></textarea><button type="button" class="remove-item" (click)="removeNotice(i)">Remove</button></div></div>
     </div>
     <div class="admin-actions"><button class="danger" (click)="signOut()">Sign out</button><button class="danger" (click)="reset()">Reset</button><label class="file">Import backup<input type="file" accept="application/json" (change)="importData($event)"></label><button (click)="exportData()">Export backup</button><button class="primary" (click)="save()">{{ saved() ? 'Saved ✓' : 'Save changes' }}</button></div>
   </aside>
