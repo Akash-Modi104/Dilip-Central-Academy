@@ -25,6 +25,7 @@ urlpatterns = [
     # Django's built-in admin lives at /django-admin/ so /admin/ is free
     # for the Angular custom admin SPA served by nginx.
     path('django-admin/', admin.site.urls),
+    path('api/', include('apps.studio.urls')),
     path('api/v1/', include(api_v1)),
 ]
 

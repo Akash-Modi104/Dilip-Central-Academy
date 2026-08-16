@@ -1,0 +1,91 @@
+<header class="topbar">
+  <a class="brand" (click)="scroll('home')" aria-label="Dilip Central Academy home">
+    <img class="school-logo" [src]="content().logo" alt="Dilip Central Academy logo"><span><strong>{{ content().schoolName }}</strong><small>{{ content().tagline }}</small></span>
+  </a>
+  <button class="menu" (click)="menuOpen.set(!menuOpen())" aria-label="Toggle navigation">☰</button>
+  <nav [class.open]="menuOpen()">
+    <button (click)="scroll('about')">About</button><button (click)="scroll('learning')">Learning</button><button (click)="scroll('admissions')">Admissions</button>
+    <button (click)="scroll('gallery')">Gallery</button><button (click)="scroll('contact')">Contact</button>
+    <button class="admin-link" (click)="openAdmin()">Admin studio</button>
+  </nav>
+</header>
+
+<main>
+  <section id="home" class="hero">
+    <img src="assets/prospectus-cover.jpeg" alt="Dilip Central Academy school building">
+    <div class="hero-shade"></div>
+    <div class="hero-content">
+      <span class="eyebrow">{{ content().since }}</span><h1>{{ content().heroTitle }}</h1><p>{{ content().heroText }}</p>
+      <div class="hero-actions"><button class="primary" (click)="scroll('contact')">Enquire for admission</button><button class="ghost" (click)="scroll('about')">Explore our school</button></div>
+    </div>
+    <div class="notice"><span>Latest notice</span><p>{{ content().notice }}</p></div>
+  </section>
+
+  <section id="about" class="section intro">
+    <div><span class="kicker">Welcome to DCA</span><h2>{{ content().aboutTitle }}</h2><p class="lead">{{ content().aboutText }}</p></div>
+    <div class="quote"><span>“</span><p>{{ content().principalMessage }}</p><strong>— School leadership</strong></div>
+  </section>
+
+  <section id="learning" class="section learning">
+    <div class="section-heading"><span class="kicker">The DCA experience</span><h2>{{ content().learningTitle }}</h2></div>
+    <div class="feature-grid"><article *ngFor="let item of content().facilities; let i = index"><span>0{{ i + 1 }}</span><h3>{{ item.title }}</h3><p>{{ item.detail }}</p></article></div>
+  </section>
+
+  <section class="section updates">
+    <div><span class="kicker">Notice board</span><h2>What families need to know</h2></div>
+    <div class="notice-grid"><article *ngFor="let item of content().notices"><span>{{ item.date }}</span><h3>{{ item.title }}</h3><p>{{ item.detail }}</p></article></div>
+  </section>
+
+  <section id="admissions" class="section admissions">
+    <div><span class="kicker">Admissions</span><h2>{{ content().admissionsTitle }}</h2><p>{{ content().admissionsText }}</p><ol><li *ngFor="let step of content().admissionSteps"><b>{{ step.title }}</b><span>{{ step.detail }}</span></li></ol></div>
+    <div class="admission-card"><h3>Documents to bring</h3><ul><li *ngFor="let document of content().admissionDocuments">{{ document }}</li></ul><button class="primary" (click)="scroll('enquiry')">Start an enquiry</button></div>
+  </section>
+
+  <section class="section resources">
+    <div class="section-heading"><span class="kicker">Student development</span><h2>{{ content().resourcesTitle }}</h2></div>
+    <div class="resource-grid"><article *ngFor="let resource of content().resources"><h3>{{ resource.title }}</h3><p>{{ resource.detail }}</p></article></div>
+  </section>
+
+  <section id="gallery" class="section gallery">
+    <div class="section-heading"><span class="kicker">Life at school</span><h2>Moments that shape memories</h2><p>From recognition and cultural programmes to exhibitions and school functions.</p></div>
+    <div class="gallery-grid"><figure *ngFor="let activity of content().gallery"><img [src]="activity.image" [alt]="activity.title"><figcaption>{{ activity.title }}</figcaption></figure></div>
+  </section>
+
+  <section id="contact" class="contact">
+    <div class="contact-copy"><span class="kicker light">Visit us</span><h2>Come see where learning begins.</h2><p>{{ content().address }}</p>
+      <div class="contact-list"><a [href]="'tel:' + content().phone.split(',')[0]">☎ {{ content().phone }}</a><a [href]="'mailto:' + content().email">✉ {{ content().email }}</a></div>
+      <a class="map-button" [href]="content().mapLink" target="_blank" rel="noopener">Get directions ↗</a>
+    </div>
+    <div class="map-wrap"><iframe [src]="mapUrl" title="Dilip Central Academy map" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe><a [href]="content().mapLink" target="_blank" rel="noopener">Open in Google Maps ↗</a></div>
+  </section>
+  <section id="enquiry" class="section enquiry"><div><span class="kicker">Admission enquiry</span><h2>Tell us how we can help.</h2><p>Complete these details to open a prepared WhatsApp message to the school. Nothing is stored or sent by this website.</p></div><form (ngSubmit)="sendEnquiry()"><label>Parent / guardian name<input name="parent" [(ngModel)]="enquiry.parent" required></label><label>Child’s name<input name="child" [(ngModel)]="enquiry.child" required></label><label>Class seeking admission<input name="className" [(ngModel)]="enquiry.className" required></label><label>Contact number<input name="phone" type="tel" [(ngModel)]="enquiry.phone" required></label><button class="primary" type="submit">Continue on WhatsApp ↗</button></form></section>
+</main>
+
+<footer><div class="footer-brand"><img class="footer-logo" [src]="content().logo" alt="Dilip Central Academy logo"><span><strong>{{ content().schoolName }}</strong><small>{{ content().tagline }}</small></span></div><p>English Medium Co-Ed Public School · Mandu, Ramgarh</p><button (click)="openAdmin()">Admin studio</button></footer>
+
+<div class="modal" *ngIf="adminOpen()" (click)="closeAdmin()">
+  <aside class="login-panel" *ngIf="!isAdmin()" (click)="$event.stopPropagation()"><button class="close" (click)="closeAdmin()" aria-label="Close admin login">×</button><img class="login-logo" [src]="content().logo" alt="Dilip Central Academy logo"><span class="kicker">Restricted area</span><h2>Admin sign in</h2><p>Only authorised school staff may continue.</p><form (ngSubmit)="signIn()"><label>Username<input name="adminUsername" autocomplete="username" [(ngModel)]="login.username" required></label><label>Password<input name="adminPassword" type="password" autocomplete="current-password" [(ngModel)]="login.password" required></label><small class="login-error" *ngIf="loginError()">{{ loginError() }}</small><button class="primary" type="submit">Sign in</button></form><small class="security-note">Protected by the school’s Django authentication service.</small></aside>
+  <aside class="admin" *ngIf="isAdmin()" (click)="$event.stopPropagation()">
+    <div class="admin-head"><div><span class="kicker">Content manager</span><h2>Admin studio</h2><p>Changes are saved securely to the school server.</p></div><button class="close" (click)="closeAdmin()" aria-label="Close admin studio">×</button></div>
+    <div class="admin-grid">
+      <label>School name<input [(ngModel)]="draft.schoolName"></label><label>Tagline<input [(ngModel)]="draft.tagline"></label>
+      <label>Since line<input [(ngModel)]="draft.since"></label><label>Phone numbers<input [(ngModel)]="draft.phone"></label>
+      <label class="wide">Hero headline<input [(ngModel)]="draft.heroTitle"></label><label class="wide">Hero introduction<textarea [(ngModel)]="draft.heroText"></textarea></label>
+      <label class="wide">Latest notice<textarea [(ngModel)]="draft.notice"></textarea></label><label>Contact email<input type="email" [(ngModel)]="draft.email"></label>
+      <label>Address<input [(ngModel)]="draft.address"></label><label class="wide">Google Maps link<input [(ngModel)]="draft.mapLink"></label>
+      <label class="wide">About heading<input [(ngModel)]="draft.aboutTitle"></label><label class="wide">About text<textarea [(ngModel)]="draft.aboutText"></textarea></label>
+      <label class="wide">Leadership message<textarea [(ngModel)]="draft.principalMessage"></textarea></label>
+      <label class="wide">Logo image URL<input [(ngModel)]="draft.logo"></label><label class="wide">Learning section heading<input [(ngModel)]="draft.learningTitle"></label>
+      <div class="wide notice-edit"><h3>Learning cards</h3><div *ngFor="let item of draft.facilities"><input [(ngModel)]="item.title" aria-label="Learning title"><textarea [(ngModel)]="item.detail" aria-label="Learning details"></textarea></div></div>
+      <label class="wide">Admissions heading<input [(ngModel)]="draft.admissionsTitle"></label><label class="wide">Admissions introduction<textarea [(ngModel)]="draft.admissionsText"></textarea></label>
+      <div class="wide notice-edit"><h3>Admission steps</h3><div *ngFor="let item of draft.admissionSteps"><input [(ngModel)]="item.title" aria-label="Step title"><textarea [(ngModel)]="item.detail" aria-label="Step details"></textarea></div></div>
+      <div class="wide document-edit"><h3>Admission documents</h3><input *ngFor="let item of draft.admissionDocuments; let i = index" [(ngModel)]="draft.admissionDocuments[i]" aria-label="Required document"></div>
+      <label class="wide">Student development heading<input [(ngModel)]="draft.resourcesTitle"></label>
+      <div class="wide notice-edit"><h3>Student development cards</h3><div *ngFor="let item of draft.resources"><input [(ngModel)]="item.title" aria-label="Resource title"><textarea [(ngModel)]="item.detail" aria-label="Resource details"></textarea></div></div>
+      <div class="wide gallery-edit"><h3>Gallery details</h3><div *ngFor="let item of draft.gallery"><input [(ngModel)]="item.title" aria-label="Gallery title"><input [(ngModel)]="item.image" aria-label="Gallery image URL"></div></div>
+      <label class="wide file">Upload gallery image<input type="file" accept="image/*" (change)="uploadGallery($event)"></label>
+      <div class="wide notice-edit"><h3>Notice board</h3><div *ngFor="let item of draft.notices"><input [(ngModel)]="item.date" aria-label="Notice label"><input [(ngModel)]="item.title" aria-label="Notice title"><textarea [(ngModel)]="item.detail" aria-label="Notice details"></textarea></div></div>
+    </div>
+    <div class="admin-actions"><button class="danger" (click)="signOut()">Sign out</button><button class="danger" (click)="reset()">Reset</button><label class="file">Import backup<input type="file" accept="application/json" (change)="importData($event)"></label><button (click)="exportData()">Export backup</button><button class="primary" (click)="save()">{{ saved() ? 'Saved ✓' : 'Save changes' }}</button></div>
+  </aside>
+</div>

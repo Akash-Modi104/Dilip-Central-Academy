@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     'apps.academics',
     'apps.news',
     'apps.gallery',
+    'apps.studio',
     'apps.admissions',
     'apps.contact',
     'apps.faculty',
