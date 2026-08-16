@@ -4,8 +4,8 @@
   </a>
   <button class="menu" (click)="menuOpen.set(!menuOpen())" aria-label="Toggle navigation">☰</button>
   <nav [class.open]="menuOpen()">
-    <button (click)="scroll('about')">About</button><button (click)="scroll('purpose')">Vision & Mission</button><button (click)="scroll('notices')">Notices</button><button (click)="scroll('admissions')">Admissions</button>
-    <button (click)="scroll('achievers')">Achievers</button><button (click)="scroll('gallery')">Gallery</button><button (click)="scroll('contact')">Contact</button>
+    <button (click)="scroll('notices')">Notices</button><button (click)="scroll('about')">About</button><button (click)="scroll('purpose')">Vision & Mission</button><button (click)="scroll('gallery')">Gallery</button>
+    <button (click)="scroll('learning')">Learning</button><button (click)="scroll('achievers')">Achievers</button><button (click)="scroll('admissions')">Admissions</button><button (click)="scroll('contact')">Contact</button>
     <button class="theme-toggle" type="button" (click)="toggleTheme()" [attr.aria-pressed]="nightMode()" [attr.aria-label]="nightMode() ? 'Switch to day mode' : 'Switch to night mode'">{{ nightMode() ? '☀ Day' : '☾ Night' }}</button>
   </nav>
 </header>
@@ -18,10 +18,28 @@
     <div class="hero-shade"></div>
     <div class="hero-content">
       <span class="eyebrow">{{ content().since }}</span><h1>{{ content().heroTitle }}</h1><p>{{ content().heroText }}</p>
-      <div class="hero-actions"><button class="primary" (click)="scroll('contact')">Enquire for admission</button><button class="ghost" (click)="scroll('about')">Explore our school</button></div>
+      <div class="hero-actions"><button class="primary" (click)="scroll('enquiry')">Enquire for admission</button><button class="ghost" (click)="scroll('about')">Explore our school</button></div>
     </div>
     <div class="hero-dots" *ngIf="heroSlides().length > 1"><button *ngFor="let slide of heroSlides(); let i = index" [class.active]="i === heroIndex()" (click)="setHero(i)" [attr.aria-label]="'Show ' + slide.title"></button></div>
     <div class="notice"><span>Latest notice</span><p>{{ content().notice }}</p></div>
+  </section>
+
+  <section id="notices" class="section notice-showcase">
+    <div class="notice-layout">
+      <div class="notice-intro">
+        <span class="notice-kicker">Notice Board</span>
+        <h2>{{ content().noticeBoardTitle }}</h2>
+        <p>Important announcements, reminders and school information—all in one place.</p>
+        <span class="notice-count" *ngIf="noticeItems().length">{{ noticeItems().length }} active {{ noticeItems().length === 1 ? 'notice' : 'notices' }}</span>
+      </div>
+      <div class="notice-panel" *ngIf="activeNotice() as current">
+        <div class="notice-main">
+          <article class="notice-feature rotating-notice" *ngFor="let item of noticeItems(); let i = index" [hidden]="i !== currentNoticeIndex()" [class.highlighted]="item.highlighted"><div class="notice-meta"><span>{{ item.date }}</span><strong *ngIf="item.highlighted">★ Important</strong></div><h3>{{ item.title }}</h3><p>{{ item.detail }}</p></article>
+          <div class="notice-controls" *ngIf="noticeItems().length > 1"><button type="button" (click)="previousNotice()" aria-label="Previous notice">←</button><div class="notice-dots"><button type="button" *ngFor="let item of noticeItems(); let i = index" [class.active]="i === currentNoticeIndex()" (click)="setNotice(i)" [attr.aria-label]="'Show notice ' + (i + 1)"></button></div><span>{{ currentNoticeIndex() + 1 }} / {{ noticeItems().length }}</span><button type="button" (click)="nextNotice()" aria-label="Next notice">→</button></div>
+        </div>
+        <button class="next-notice" type="button" *ngIf="upcomingNotice() as next" (click)="nextNotice()"><span>Up next</span><strong>{{ next.title }}</strong><small>{{ next.date }}</small><b>View notice →</b></button>
+      </div>
+    </div>
   </section>
 
   <section id="about" class="section intro">
@@ -34,25 +52,17 @@
     <article class="purpose-card mission-card"><span>02 · Commitment</span><h2>{{ content().missionTitle }}</h2><p>{{ content().missionText }}</p></article>
   </section>
 
-  <section id="learning" class="section learning">
-    <div class="section-heading"><span class="kicker">The DCA experience</span><h2>{{ content().learningTitle }}</h2></div>
-    <div class="feature-grid"><article *ngFor="let item of content().facilities; let i = index"><span>0{{ i + 1 }}</span><h3>{{ item.title }}</h3><p>{{ item.detail }}</p></article></div>
-  </section>
-
-  <section id="notices" class="section notice-showcase">
-    <div class="notice-title"><div><span class="notice-kicker">School announcements</span><h2>{{ content().noticeBoardTitle }}</h2></div><span class="notice-board-label">Notice Board</span></div>
-    <div class="notice-stage notice-carousel" *ngIf="activeNotice() as current">
-      <div class="notice-main">
-        <article class="notice-feature rotating-notice" *ngFor="let item of noticeItems(); let i = index" [hidden]="i !== currentNoticeIndex()" [class.highlighted]="item.highlighted"><div class="notice-meta"><span>{{ item.date }}</span><strong *ngIf="item.highlighted">★ Important</strong></div><h3>{{ item.title }}</h3><p>{{ item.detail }}</p></article>
-        <div class="notice-controls" *ngIf="noticeItems().length > 1"><button type="button" (click)="previousNotice()" aria-label="Previous notice">←</button><div class="notice-dots"><button type="button" *ngFor="let item of noticeItems(); let i = index" [class.active]="i === currentNoticeIndex()" (click)="setNotice(i)" [attr.aria-label]="'Show notice ' + (i + 1)"></button></div><span>{{ currentNoticeIndex() + 1 }} / {{ noticeItems().length }}</span><button type="button" (click)="nextNotice()" aria-label="Next notice">→</button></div>
-      </div>
-      <button class="next-notice" type="button" *ngIf="upcomingNotice() as next" (click)="nextNotice()"><span>Next notice</span><strong>{{ next.title }}</strong><small>{{ next.date }}</small><b>View next →</b></button>
+  <section id="gallery" class="section gallery">
+    <div class="section-heading"><span class="kicker">Life at school</span><h2>Moments that shape memories</h2><p>From recognition and cultural programmes to exhibitions and school functions.</p></div>
+    <div class="album-block" *ngFor="let album of displayAlbums()">
+      <div class="album-heading"><h3>{{ album.title }}</h3><p *ngIf="album.description">{{ album.description }}</p></div>
+      <div class="gallery-grid"><figure *ngFor="let activity of album.images"><img [src]="activity.image" [alt]="activity.title"><figcaption>{{ activity.title }}</figcaption></figure></div>
     </div>
   </section>
 
-  <section id="admissions" class="section admissions">
-    <div><span class="kicker">Admissions</span><h2>{{ content().admissionsTitle }}</h2><p>{{ content().admissionsText }}</p><ol><li *ngFor="let step of content().admissionSteps"><b>{{ step.title }}</b><span>{{ step.detail }}</span></li></ol></div>
-    <div class="admission-card"><h3>Documents to bring</h3><ul><li *ngFor="let document of content().admissionDocuments">{{ document }}</li></ul><button class="primary" (click)="scroll('enquiry')">Start an enquiry</button></div>
+  <section id="learning" class="section learning">
+    <div class="section-heading"><span class="kicker">The DCA experience</span><h2>{{ content().learningTitle }}</h2></div>
+    <div class="feature-grid"><article *ngFor="let item of content().facilities; let i = index"><span>0{{ i + 1 }}</span><h3>{{ item.title }}</h3><p>{{ item.detail }}</p></article></div>
   </section>
 
   <section class="section resources">
@@ -65,13 +75,12 @@
     <div class="achiever-grid"><article *ngFor="let achiever of content().achievers"><div class="achiever-photo"><img *ngIf="achiever.image" [src]="achiever.image" [alt]="achiever.name"><span *ngIf="!achiever.image">★</span></div><div><small>Achievement spotlight</small><h3>{{ achiever.name }}</h3><p>{{ achiever.achievement }}</p></div></article></div>
   </section>
 
-  <section id="gallery" class="section gallery">
-    <div class="section-heading"><span class="kicker">Life at school</span><h2>Moments that shape memories</h2><p>From recognition and cultural programmes to exhibitions and school functions.</p></div>
-    <div class="album-block" *ngFor="let album of displayAlbums()">
-      <div class="album-heading"><h3>{{ album.title }}</h3><p *ngIf="album.description">{{ album.description }}</p></div>
-      <div class="gallery-grid"><figure *ngFor="let activity of album.images"><img [src]="activity.image" [alt]="activity.title"><figcaption>{{ activity.title }}</figcaption></figure></div>
-    </div>
+  <section id="admissions" class="section admissions">
+    <div><span class="kicker">Admissions</span><h2>{{ content().admissionsTitle }}</h2><p>{{ content().admissionsText }}</p><ol><li *ngFor="let step of content().admissionSteps"><b>{{ step.title }}</b><span>{{ step.detail }}</span></li></ol></div>
+    <div class="admission-card"><h3>Documents to bring</h3><ul><li *ngFor="let document of content().admissionDocuments">{{ document }}</li></ul><button class="primary" (click)="scroll('enquiry')">Start an enquiry</button></div>
   </section>
+
+  <section id="enquiry" class="section enquiry"><div><span class="kicker">Admission enquiry</span><h2>Tell us how we can help.</h2><p>Complete these details to open a prepared WhatsApp message to the school. Nothing is stored or sent by this website.</p></div><form (ngSubmit)="sendEnquiry()"><label>Parent / guardian name<input name="parent" [(ngModel)]="enquiry.parent" required></label><label>Child’s name<input name="child" [(ngModel)]="enquiry.child" required></label><label>Class seeking admission<input name="className" [(ngModel)]="enquiry.className" required></label><label>Contact number<input name="phone" type="tel" [(ngModel)]="enquiry.phone" required></label><button class="primary" type="submit">Continue on WhatsApp ↗</button></form></section>
 
   <section id="contact" class="contact">
     <div class="contact-copy"><span class="kicker light">Visit us</span><h2>Come see where learning begins.</h2><p>{{ content().address }}</p>
@@ -80,10 +89,9 @@
     </div>
     <div class="map-wrap"><iframe [src]="mapUrl" title="Dilip Central Academy map" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe><a [href]="content().mapLink" target="_blank" rel="noopener">Open in Google Maps ↗</a></div>
   </section>
-  <section id="enquiry" class="section enquiry"><div><span class="kicker">Admission enquiry</span><h2>Tell us how we can help.</h2><p>Complete these details to open a prepared WhatsApp message to the school. Nothing is stored or sent by this website.</p></div><form (ngSubmit)="sendEnquiry()"><label>Parent / guardian name<input name="parent" [(ngModel)]="enquiry.parent" required></label><label>Child’s name<input name="child" [(ngModel)]="enquiry.child" required></label><label>Class seeking admission<input name="className" [(ngModel)]="enquiry.className" required></label><label>Contact number<input name="phone" type="tel" [(ngModel)]="enquiry.phone" required></label><button class="primary" type="submit">Continue on WhatsApp ↗</button></form></section>
 </main>
 
-<footer><div class="footer-brand"><img class="footer-logo" [src]="content().logo" alt="Dilip Central Academy logo"><span><strong>{{ content().schoolName }}</strong><small>{{ content().tagline }}</small></span></div><div class="footer-links" aria-label="Footer navigation"><button (click)="scroll('about')">About</button><button (click)="scroll('purpose')">Vision & Mission</button><button (click)="scroll('notices')">Notices</button><button (click)="scroll('admissions')">Admissions</button><button (click)="scroll('achievers')">Achievers</button><button (click)="scroll('gallery')">Gallery</button><button (click)="scroll('contact')">Contact</button></div><div class="footer-meta"><p>English Medium Co-Ed Public School · Mandu, Ramgarh</p></div></footer>
+<footer><div class="footer-brand"><img class="footer-logo" [src]="content().logo" alt="Dilip Central Academy logo"><span><strong>{{ content().schoolName }}</strong><small>{{ content().tagline }}</small></span></div><div class="footer-links" aria-label="Footer navigation"><button (click)="scroll('notices')">Notices</button><button (click)="scroll('about')">About</button><button (click)="scroll('purpose')">Vision & Mission</button><button (click)="scroll('gallery')">Gallery</button><button (click)="scroll('learning')">Learning</button><button (click)="scroll('achievers')">Achievers</button><button (click)="scroll('admissions')">Admissions</button><button (click)="scroll('contact')">Contact</button></div><div class="footer-meta"><p>English Medium Co-Ed Public School · Mandu, Ramgarh</p></div></footer>
 
 <div class="modal" *ngIf="adminOpen()" (click)="closeAdmin()">
   <aside class="login-panel" *ngIf="!isAdmin()" (click)="$event.stopPropagation()"><button class="close" (click)="closeAdmin()" aria-label="Close admin login">×</button><img class="login-logo" [src]="content().logo" alt="Dilip Central Academy logo"><span class="kicker">Restricted area</span><h2>Admin sign in</h2><p>Only authorised school staff may continue.</p><form (ngSubmit)="signIn()"><label>Username<input name="adminUsername" autocomplete="username" [(ngModel)]="login.username" required></label><label>Password<input name="adminPassword" type="password" autocomplete="current-password" [(ngModel)]="login.password" required></label><small class="login-error" *ngIf="loginError()">{{ loginError() }}</small><button class="primary" type="submit">Sign in</button></form><small class="security-note">Protected by the school’s Django authentication service.</small></aside>
