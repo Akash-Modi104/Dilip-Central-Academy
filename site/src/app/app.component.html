@@ -5,12 +5,19 @@
   <button class="menu" (click)="menuOpen.set(!menuOpen())" aria-label="Toggle navigation">☰</button>
   <nav [class.open]="menuOpen()">
     <button (click)="scroll('notices')">Notices</button><button (click)="scroll('about')">About</button><button (click)="scroll('purpose')">Vision & Mission</button><button (click)="scroll('gallery')">Gallery</button>
-    <button (click)="scroll('learning')">Learning</button><button (click)="scroll('achievers')">Achievers</button><button (click)="scroll('admissions')">Admissions</button><button (click)="scroll('contact')">Contact</button>
+    <button (click)="scroll('learning')">Learning</button><button (click)="scroll('achievers')">Achievers</button><button (click)="scroll('admissions')">Admissions</button><button *ngFor="let section of navigationCustomSections()" (click)="scroll(customSectionAnchor(section))">{{ section.navLabel || section.title }}</button><button (click)="scroll('contact')">Contact</button>
     <button class="theme-toggle" type="button" (click)="toggleTheme()" [attr.aria-pressed]="nightMode()" [attr.aria-label]="nightMode() ? 'Switch to day mode' : 'Switch to night mode'">{{ nightMode() ? '☀ Day' : '☾ Night' }}</button>
   </nav>
 </header>
 
 <main>
+  <ng-template #customSectionGroup let-position="position">
+    <section *ngFor="let section of customSectionsAt(position)" [id]="customSectionAnchor(section)" class="section custom-public-section" [ngClass]="'custom-theme-' + section.theme" [class.no-image]="!section.image">
+      <div class="custom-section-copy"><span class="kicker">{{ section.kicker }}</span><h2>{{ section.title }}</h2><p>{{ section.body }}</p></div>
+      <div class="custom-section-image" *ngIf="section.image"><img [src]="section.image" [alt]="section.title"></div>
+    </section>
+  </ng-template>
+
   <section id="home" class="hero">
     <div class="hero-slides">
       <img *ngFor="let slide of heroSlides(); let i = index" class="hero-slide" [class.active]="i === heroIndex()" [src]="slide.image" [alt]="slide.title">
@@ -41,6 +48,7 @@
       </div>
     </div>
   </section>
+  <ng-container *ngTemplateOutlet="customSectionGroup; context: { position: 'after_notices' }"></ng-container>
 
   <section id="about" class="section intro">
     <div><span class="kicker">Welcome to DCA</span><h2>{{ content().aboutTitle }}</h2><p class="lead">{{ content().aboutText }}</p></div>
@@ -59,6 +67,7 @@
       <div class="gallery-grid"><figure *ngFor="let activity of album.images"><img [src]="activity.image" [alt]="activity.title"><figcaption>{{ activity.title }}</figcaption></figure></div>
     </div>
   </section>
+  <ng-container *ngTemplateOutlet="customSectionGroup; context: { position: 'after_gallery' }"></ng-container>
 
   <section id="learning" class="section learning">
     <div class="section-heading"><span class="kicker">The DCA experience</span><h2>{{ content().learningTitle }}</h2></div>
@@ -74,6 +83,7 @@
     <div class="section-heading"><span class="kicker">DCA pride</span><h2>{{ content().achieversTitle }}</h2><p>Honouring effort, confidence and the many talents of our students.</p></div>
     <div class="achiever-grid"><article *ngFor="let achiever of content().achievers"><div class="achiever-photo"><img *ngIf="achiever.image" [src]="achiever.image" [alt]="achiever.name"><span *ngIf="!achiever.image">★</span></div><div><small>Achievement spotlight</small><h3>{{ achiever.name }}</h3><p>{{ achiever.achievement }}</p></div></article></div>
   </section>
+  <ng-container *ngTemplateOutlet="customSectionGroup; context: { position: 'before_admissions' }"></ng-container>
 
   <section id="admissions" class="section admissions">
     <div><span class="kicker">Admissions</span><h2>{{ content().admissionsTitle }}</h2><p>{{ content().admissionsText }}</p><ol><li *ngFor="let step of content().admissionSteps"><b>{{ step.title }}</b><span>{{ step.detail }}</span></li></ol></div>
@@ -91,7 +101,7 @@
   </section>
 </main>
 
-<footer><div class="footer-brand"><img class="footer-logo" [src]="content().logo" alt="Dilip Central Academy logo"><span><strong>{{ content().schoolName }}</strong><small>{{ content().tagline }}</small></span></div><div class="footer-links" aria-label="Footer navigation"><button (click)="scroll('notices')">Notices</button><button (click)="scroll('about')">About</button><button (click)="scroll('purpose')">Vision & Mission</button><button (click)="scroll('gallery')">Gallery</button><button (click)="scroll('learning')">Learning</button><button (click)="scroll('achievers')">Achievers</button><button (click)="scroll('admissions')">Admissions</button><button (click)="scroll('contact')">Contact</button></div><div class="footer-meta"><p>English Medium Co-Ed Public School · Mandu, Ramgarh</p></div></footer>
+<footer><div class="footer-brand"><img class="footer-logo" [src]="content().logo" alt="Dilip Central Academy logo"><span><strong>{{ content().schoolName }}</strong><small>{{ content().tagline }}</small></span></div><div class="footer-links" aria-label="Footer navigation"><button (click)="scroll('notices')">Notices</button><button (click)="scroll('about')">About</button><button (click)="scroll('purpose')">Vision & Mission</button><button (click)="scroll('gallery')">Gallery</button><button (click)="scroll('learning')">Learning</button><button (click)="scroll('achievers')">Achievers</button><button (click)="scroll('admissions')">Admissions</button><button *ngFor="let section of navigationCustomSections()" (click)="scroll(customSectionAnchor(section))">{{ section.navLabel || section.title }}</button><button (click)="scroll('contact')">Contact</button></div><div class="footer-meta"><p>English Medium Co-Ed Public School · Mandu, Ramgarh</p></div></footer>
 
 <div class="modal" *ngIf="adminOpen()" (click)="closeAdmin()">
   <aside class="login-panel" *ngIf="!isAdmin()" (click)="$event.stopPropagation()"><button class="close" (click)="closeAdmin()" aria-label="Close admin login">×</button><img class="login-logo" [src]="content().logo" alt="Dilip Central Academy logo"><span class="kicker">Restricted area</span><h2>Admin sign in</h2><p>Only authorised school staff may continue.</p><form (ngSubmit)="signIn()"><label>Username<input name="adminUsername" autocomplete="username" [(ngModel)]="login.username" required></label><label>Password<input name="adminPassword" type="password" autocomplete="current-password" [(ngModel)]="login.password" required></label><small class="login-error" *ngIf="loginError()">{{ loginError() }}</small><button class="primary" type="submit">Sign in</button></form><small class="security-note">Protected by the school’s Django authentication service.</small></aside>
@@ -116,6 +126,7 @@
       <label class="wide">Student development heading<input [(ngModel)]="draft.resourcesTitle"></label>
       <div class="wide notice-edit"><h3>Student development cards</h3><div *ngFor="let item of draft.resources"><input [(ngModel)]="item.title" aria-label="Resource title"><textarea [(ngModel)]="item.detail" aria-label="Resource details"></textarea></div></div>
       <div class="wide admin-section"><div class="admin-section-head"><h3>Achievers section</h3><button type="button" (click)="addAchiever()">+ Add achiever</button></div><label>Section heading<input [(ngModel)]="draft.achieversTitle"></label><div class="editor-row achiever-editor" *ngFor="let item of draft.achievers; let i = index"><input [(ngModel)]="item.name" aria-label="Achiever name" placeholder="Name or team"><input [(ngModel)]="item.image" aria-label="Achiever image URL" placeholder="Image URL"><textarea [(ngModel)]="item.achievement" aria-label="Achievement details" placeholder="Achievement details"></textarea><button type="button" class="remove-item" (click)="removeAchiever(i)">Remove</button></div></div>
+      <div class="wide admin-section custom-section-manager"><div class="admin-section-head"><div><h3>Custom sections</h3><p>Create additional page sections and optionally add them to the site navigation.</p></div><button type="button" (click)="addCustomSection()">+ Add custom section</button></div><div class="custom-section-editor" *ngFor="let section of draft.customSections; let i = index"><div class="custom-editor-head"><strong>Custom section {{ i + 1 }}</strong><div><button type="button" (click)="moveCustomSection(i, -1)" [disabled]="i === 0" aria-label="Move section up">↑</button><button type="button" (click)="moveCustomSection(i, 1)" [disabled]="i === draft.customSections.length - 1" aria-label="Move section down">↓</button><button type="button" class="remove-item" (click)="removeCustomSection(i)">Remove</button></div></div><div class="custom-switches"><label><input type="checkbox" [(ngModel)]="section.enabled"> Show section on website</label><label><input type="checkbox" [(ngModel)]="section.showInNavigation"> Add to navigation</label></div><div class="custom-fields"><label>Navigation label<input [(ngModel)]="section.navLabel" placeholder="Short menu label"></label><label>Small label<input [(ngModel)]="section.kicker" placeholder="Section category"></label><label class="wide">Section heading<input [(ngModel)]="section.title" placeholder="Section heading"></label><label class="wide">Section content<textarea [(ngModel)]="section.body" placeholder="Write the section content"></textarea></label><label>Page position<select [(ngModel)]="section.placement"><option value="after_notices">After Notice Board</option><option value="after_gallery">After Gallery</option><option value="before_admissions">Before Admissions</option></select></label><label>Colour style<select [(ngModel)]="section.theme"><option value="light">Light</option><option value="maroon">Maroon</option><option value="gold">Gold</option></select></label><label class="wide">Image URL<input [(ngModel)]="section.image" placeholder="Image URL (optional)"></label><label class="file multi-upload">Upload section image<input type="file" accept="image/jpeg,image/png,image/webp,image/gif" (change)="uploadCustomSectionImage($event, i)"></label></div></div><p class="empty-manager" *ngIf="!draft.customSections.length">No custom sections yet. Select “Add custom section” to create one.</p></div>
       <div class="wide admin-section album-manager"><div class="admin-section-head"><h3>Gallery albums</h3><button type="button" (click)="addAlbum()">+ Create album</button></div><div class="album-editor" *ngFor="let album of draft.albums; let albumIndex = index"><div class="album-title-row"><input [(ngModel)]="album.title" aria-label="Album title" placeholder="Album title"><button type="button" class="remove-item" (click)="removeAlbum(albumIndex)">Delete album</button></div><textarea [(ngModel)]="album.description" aria-label="Album description" placeholder="Album description"></textarea><div class="editor-row" *ngFor="let item of album.images; let imageIndex = index"><input [(ngModel)]="item.title" aria-label="Album image title" placeholder="Image title"><input [(ngModel)]="item.image" aria-label="Album image URL" placeholder="Image URL"><button type="button" class="remove-item" (click)="removeAlbumImage(albumIndex, imageIndex)">Remove</button></div><label class="file multi-upload">Add multiple images<input type="file" accept="image/*" multiple (change)="uploadAlbumImages($event, albumIndex)"></label></div></div>
       <div class="wide admin-section notice-manager"><div class="admin-section-head"><h3>Flashy notice board</h3><button type="button" (click)="addNotice()">+ Add notice</button></div><label>Section heading<input [(ngModel)]="draft.noticeBoardTitle"></label><div class="editor-row notice-admin-row" *ngFor="let item of draft.notices; let i = index"><input [(ngModel)]="item.date" aria-label="Notice label" placeholder="Label or date"><input [(ngModel)]="item.title" aria-label="Notice title" placeholder="Notice title"><textarea [(ngModel)]="item.detail" aria-label="Notice details" placeholder="Notice details"></textarea><label class="highlight-toggle"><input type="checkbox" [(ngModel)]="item.highlighted"> Highlight this notice</label><button type="button" class="remove-item" (click)="removeNotice(i)">Remove</button></div></div>
     </div>

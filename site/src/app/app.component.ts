@@ -8,6 +8,9 @@ type GalleryItem = { title: string; image: string };
 type GalleryAlbum = { title: string; description: string; images: GalleryItem[] };
 type Achiever = { name: string; achievement: string; image: string };
 type InfoCard = { title: string; detail: string };
+type CustomSectionPlacement = 'after_notices' | 'after_gallery' | 'before_admissions';
+type CustomSectionTheme = 'light' | 'maroon' | 'gold';
+type CustomSection = { id: string; navLabel: string; kicker: string; title: string; body: string; image: string; enabled: boolean; showInNavigation: boolean; placement: CustomSectionPlacement; theme: CustomSectionTheme };
 type Content = {
   schoolName: string; tagline: string; since: string; heroTitle: string; heroText: string;
   phone: string; email: string; address: string; mapLink: string; notice: string;
@@ -16,7 +19,7 @@ type Content = {
   admissionSteps: InfoCard[]; admissionDocuments: string[]; resourcesTitle: string; resources: InfoCard[];
   heroImages: GalleryItem[]; albums: GalleryAlbum[];
   noticeBoardTitle: string; visionTitle: string; visionText: string; missionTitle: string; missionText: string;
-  achieversTitle: string; achievers: Achiever[];
+  achieversTitle: string; achievers: Achiever[]; customSections: CustomSection[];
 };
 
 const defaults: Content = {
@@ -78,6 +81,7 @@ const defaults: Content = {
     { name: 'Competition Champions', achievement: 'Young learners building confidence through competitions, exhibitions and school programmes.', image: 'assets/prospectus-9.jpeg' },
     { name: 'Creative Achievers', achievement: 'Students expressing their talents through drama, singing and cultural activities.', image: 'assets/prospectus-13.jpeg' }
   ],
+  customSections: [],
 };
 
 @Component({
@@ -103,7 +107,7 @@ export class AppComponent implements OnDestroy {
   private noticeTimer = window.setInterval(() => this.nextNotice(), 4500);
   constructor(private sanitizer: DomSanitizer) { this.mapUrl = this.makeMapUrl(); if (this.adminOpen()) { document.body.classList.add('modal-open'); document.querySelector('meta[name="robots"]')?.setAttribute('content', 'noindex, nofollow, noarchive'); } void this.loadRemote(); }
   ngOnDestroy(): void { window.clearInterval(this.heroTimer); window.clearInterval(this.noticeTimer); }
-  private mergeContent(data: Partial<Content>): Content { const legacyImages=data.gallery?.length ? data.gallery : defaults.gallery; return { ...defaults, ...data, heroImages: data.heroImages?.length ? data.heroImages : defaults.heroImages, albums: data.albums?.length ? data.albums : [{ title: 'School Life', description: defaults.albums[0].description, images: legacyImages }] }; }
+  private mergeContent(data: Partial<Content>): Content { const legacyImages=data.gallery?.length ? data.gallery : defaults.gallery; return { ...defaults, ...data, heroImages: data.heroImages?.length ? data.heroImages : defaults.heroImages, albums: data.albums?.length ? data.albums : [{ title: 'School Life', description: defaults.albums[0].description, images: legacyImages }], customSections: Array.isArray(data.customSections) ? data.customSections : [] }; }
   private async loadRemote(): Promise<void> { if (!this.apiBase) return; try { const response = await fetch(`${this.apiBase}/api/content/`); if (!response.ok) return; const result = await response.json() as { data?: Partial<Content> }; if (result.data && Object.keys(result.data).length) { const next = this.mergeContent(result.data); this.content.set(next); this.draft = structuredClone(next); } } catch { /* remain usable offline */ } }
   private load(): Content { try { return this.mergeContent(JSON.parse(localStorage.getItem(this.key) || '{}')); } catch { return defaults; } }
   private makeMapUrl(): SafeResourceUrl { return this.sanitizer.bypassSecurityTrustResourceUrl('https://www.google.com/maps?q=23.8025032,85.465326&z=16&output=embed'); }
@@ -119,6 +123,9 @@ export class AppComponent implements OnDestroy {
   nextHero(): void { const length=this.heroSlides().length; this.heroIndex.set(length ? (this.heroIndex()+1)%length : 0); }
   setHero(index: number): void { this.heroIndex.set(index); }
   displayAlbums(): GalleryAlbum[] { return this.content().albums?.length ? this.content().albums : [{ title: 'School Life', description: '', images: this.content().gallery || [] }]; }
+  customSectionsAt(placement: CustomSectionPlacement): CustomSection[] { return (this.content().customSections || []).filter(section => section.enabled && section.placement === placement); }
+  navigationCustomSections(): CustomSection[] { return (this.content().customSections || []).filter(section => section.enabled && section.showInNavigation); }
+  customSectionAnchor(section: CustomSection): string { return `custom-section-${String(section.id || section.title).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`; }
   noticeItems(): Notice[] { return this.content().notices || []; }
   currentNoticeIndex(): number { const length=this.noticeItems().length; return length ? this.noticeIndex()%length : 0; }
   activeNotice(): Notice | null { const items=this.noticeItems(); return items.length ? items[this.currentNoticeIndex()] : null; }
@@ -138,7 +145,11 @@ export class AppComponent implements OnDestroy {
   removeNotice(index: number): void { this.draft.notices.splice(index, 1); }
   addAchiever(): void { this.draft.achievers.push({ name: 'New achiever', achievement: 'Add achievement details.', image: '' }); }
   removeAchiever(index: number): void { this.draft.achievers.splice(index, 1); }
+  addCustomSection(): void { this.draft.customSections.push({ id: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`, navLabel: 'New section', kicker: 'Discover more', title: 'New custom section', body: 'Add your section content here.', image: '', enabled: true, showInNavigation: false, placement: 'before_admissions', theme: 'light' }); }
+  removeCustomSection(index: number): void { if (confirm('Remove this custom section?')) this.draft.customSections.splice(index, 1); }
+  moveCustomSection(index: number, direction: -1 | 1): void { const next=index+direction; if (next < 0 || next >= this.draft.customSections.length) return; [this.draft.customSections[index], this.draft.customSections[next]]=[this.draft.customSections[next], this.draft.customSections[index]]; }
   private async uploadFile(file: File): Promise<GalleryItem | null> { if (!this.apiBase) return null; const form=new FormData(); form.append('image',file); form.append('title',file.name.replace(/\.[^.]+$/,'')); const response=await fetch(`${this.apiBase}/api/gallery/upload/`,{method:'POST',headers:{Authorization:`Bearer ${this.token}`},body:form}); return response.ok ? await response.json() as GalleryItem : null; }
   async uploadHeroImages(event: Event): Promise<void> { const input=event.target as HTMLInputElement; for (const file of Array.from(input.files || [])) { const item=await this.uploadFile(file); if (item) this.draft.heroImages.push(item); } input.value=''; }
   async uploadAlbumImages(event: Event, albumIndex: number): Promise<void> { const input=event.target as HTMLInputElement; for (const file of Array.from(input.files || [])) { const item=await this.uploadFile(file); if (item) this.draft.albums[albumIndex].images.push(item); } input.value=''; }
+  async uploadCustomSectionImage(event: Event, sectionIndex: number): Promise<void> { const input=event.target as HTMLInputElement; const file=input.files?.[0]; if (file) { const item=await this.uploadFile(file); if (item) this.draft.customSections[sectionIndex].image=item.image; } input.value=''; }
 }
