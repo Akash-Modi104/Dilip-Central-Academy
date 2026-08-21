@@ -55,6 +55,7 @@ class Enquiry(models.Model):
     email = models.EmailField()
     phone = models.CharField(max_length=40, blank=True)
     message = models.TextField(blank=True)
+    admin_note = models.TextField(blank=True)
     status = models.CharField(max_length=12, choices=STATUS, default=PENDING)
     created_at = models.DateTimeField(auto_now_add=True)
 

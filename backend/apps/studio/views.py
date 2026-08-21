@@ -2,14 +2,18 @@ import hashlib
 import json
 import secrets
 
+from PIL import Image, UnidentifiedImageError
 from django.contrib.auth import authenticate, get_user_model
 from django.core.cache import cache
 from django.core import signing
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
 from .models import SiteContent, StudioGalleryUpload
+from apps.admissions.models import Enquiry
 
 
 TOKEN_SALT = 'dca-admin-studio'
@@ -19,6 +23,8 @@ LOGIN_USER_LIMIT = 8
 LOGIN_IP_LIMIT = 30
 MAX_IMAGE_SIZE = 10 * 1024 * 1024
 ALLOWED_IMAGE_TYPES = {'image/jpeg', 'image/png', 'image/webp', 'image/gif'}
+ENQUIRY_WINDOW = 60 * 60
+ENQUIRY_IP_LIMIT = 6
 
 
 def _json(request):
@@ -55,6 +61,26 @@ def _login_keys(request, username):
 
 def _increment_failure(key):
     cache.set(key, int(cache.get(key, 0)) + 1, LOGIN_WINDOW)
+
+
+def _client_ip(request):
+    forwarded = request.META.get('HTTP_X_FORWARDED_FOR', '')
+    return forwarded.split(',')[0].strip() or request.META.get('REMOTE_ADDR', 'unknown')
+
+
+def _enquiry_json(enquiry):
+    return {
+        'id': enquiry.pk,
+        'student_name': enquiry.student_name,
+        'parent_name': enquiry.parent_name,
+        'grade_applying': enquiry.grade_applying,
+        'email': enquiry.email,
+        'phone': enquiry.phone,
+        'message': enquiry.message,
+        'admin_note': enquiry.admin_note,
+        'status': enquiry.status,
+        'created_at': enquiry.created_at.isoformat(),
+    }
 
 
 @require_http_methods(['GET'])
@@ -117,7 +143,80 @@ def gallery_upload(request):
         return JsonResponse({'error': 'image must be 10 MB or smaller'}, status=400)
     if image.content_type not in ALLOWED_IMAGE_TYPES:
         return JsonResponse({'error': 'only JPEG, PNG, WebP or GIF images are allowed'}, status=400)
+    try:
+        Image.open(image).verify()
+        image.seek(0)
+    except (UnidentifiedImageError, OSError, ValueError):
+        return JsonResponse({'error': 'the uploaded file is not a valid image'}, status=400)
     item = StudioGalleryUpload.objects.create(
-        title=request.POST.get('title', 'School gallery'), image=image
+        title=str(request.POST.get('title', 'School gallery'))[:160], image=image
     )
     return JsonResponse({'title': item.title, 'image': item.image.url}, status=201)
+
+
+@csrf_exempt
+@require_http_methods(['GET', 'POST'])
+def parent_enquiries(request):
+    if request.method == 'GET':
+        if not _authorized(request):
+            return JsonResponse({'error': 'Unauthorized'}, status=401)
+        enquiries = Enquiry.objects.all()[:500]
+        return JsonResponse({'results': [_enquiry_json(item) for item in enquiries]})
+
+    body = _json(request)
+    if body.get('website'):
+        return JsonResponse({'submitted': True}, status=201)
+    ip_hash = hashlib.sha256(_client_ip(request).encode()).hexdigest()
+    rate_key = f'dca-enquiry-ip:{ip_hash}'
+    if int(cache.get(rate_key, 0)) >= ENQUIRY_IP_LIMIT:
+        response = JsonResponse({'error': 'Too many enquiries. Please try again later.'}, status=429)
+        response['Retry-After'] = str(ENQUIRY_WINDOW)
+        return response
+
+    parent_name = str(body.get('parent_name', '')).strip()[:200]
+    student_name = str(body.get('student_name', '')).strip()[:200]
+    grade_applying = str(body.get('grade_applying', '')).strip()[:80]
+    phone = ''.join(character for character in str(body.get('phone', '')) if character.isdigit())[:15]
+    email = str(body.get('email', '')).strip()[:254]
+    message = str(body.get('message', '')).strip()[:3000]
+    if not parent_name or not student_name or not grade_applying or len(phone) < 10:
+        return JsonResponse({'error': 'Parent, student, class and a valid phone number are required.'}, status=400)
+    if email:
+        try:
+            validate_email(email)
+        except ValidationError:
+            return JsonResponse({'error': 'Enter a valid email address.'}, status=400)
+    enquiry = Enquiry.objects.create(
+        parent_name=parent_name,
+        student_name=student_name,
+        grade_applying=grade_applying,
+        phone=phone,
+        email=email,
+        message=message,
+    )
+    cache.set(rate_key, int(cache.get(rate_key, 0)) + 1, ENQUIRY_WINDOW)
+    return JsonResponse({'submitted': True, 'id': enquiry.pk}, status=201)
+
+
+@csrf_exempt
+@require_http_methods(['PATCH', 'DELETE'])
+def parent_enquiry_detail(request, enquiry_id):
+    if not _authorized(request):
+        return JsonResponse({'error': 'Unauthorized'}, status=401)
+    enquiry = Enquiry.objects.filter(pk=enquiry_id).first()
+    if not enquiry:
+        return JsonResponse({'error': 'Enquiry not found'}, status=404)
+    if request.method == 'DELETE':
+        enquiry.delete()
+        return JsonResponse({'deleted': True})
+    body = _json(request)
+    status = body.get('status')
+    if status is not None:
+        valid_statuses = {choice[0] for choice in Enquiry.STATUS}
+        if status not in valid_statuses:
+            return JsonResponse({'error': 'Invalid status'}, status=400)
+        enquiry.status = status
+    if 'admin_note' in body:
+        enquiry.admin_note = str(body.get('admin_note', ''))[:3000]
+    enquiry.save(update_fields=['status', 'admin_note'])
+    return JsonResponse(_enquiry_json(enquiry))
