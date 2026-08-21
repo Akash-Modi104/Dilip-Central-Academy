@@ -19,7 +19,7 @@ type Content = {
   phone: string; email: string; address: string; mapLink: string; notice: string;
   aboutTitle: string; aboutText: string; principalMessage: string; notices: Notice[]; gallery: GalleryItem[];
   logo: string; learningTitle: string; facilities: InfoCard[]; admissionsTitle: string; admissionsText: string;
-  admissionSteps: InfoCard[]; admissionDocuments: string[]; resourcesTitle: string; resources: InfoCard[];
+  admissionSteps: InfoCard[]; admissionDocuments: string[]; admissionClasses: string[]; resourcesTitle: string; resources: InfoCard[];
   heroImages: GalleryItem[]; albums: GalleryAlbum[];
   noticeBoardTitle: string; visionTitle: string; visionText: string; missionTitle: string; missionText: string;
   achieversTitle: string; achievers: Achiever[]; customSections: CustomSection[];
@@ -51,6 +51,7 @@ const defaults: Content = {
     { title: 'Submit documents', detail: 'Complete the form with verified documents and photographs.' }
   ],
   admissionDocuments: ['Birth certificate', 'Child’s Aadhaar card', 'Parent / guardian Aadhaar', 'Address proof', 'Mobile number', 'Recent photograph'],
+  admissionClasses: ['Nursery', 'LKG', 'UKG', 'Class I', 'Class II', 'Class III', 'Class IV', 'Class V', 'Class VI', 'Class VII', 'Class VIII', 'Class IX', 'Class X'],
   resourcesTitle: 'Opportunities for students to grow their talents',
   resources: [
     { title: 'Quiz & Seminars', detail: 'Opportunities to build knowledge, confidence and communication.' },
@@ -159,6 +160,16 @@ export class AppComponent implements OnDestroy {
   removeAlbumImage(albumIndex: number, imageIndex: number): void { this.draft.albums[albumIndex].images.splice(imageIndex, 1); }
   addNotice(): void { this.draft.notices.push({ date: 'New', title: 'New notice', detail: 'Add notice details here.', highlighted: false }); }
   removeNotice(index: number): void { this.draft.notices.splice(index, 1); }
+  addFacility(): void { this.draft.facilities.push({ title: 'New learning card', detail: 'Add details here.' }); }
+  removeFacility(index: number): void { this.draft.facilities.splice(index, 1); }
+  addResource(): void { this.draft.resources.push({ title: 'New student opportunity', detail: 'Add details here.' }); }
+  removeResource(index: number): void { this.draft.resources.splice(index, 1); }
+  addAdmissionStep(): void { this.draft.admissionSteps.push({ title: 'New step', detail: 'Add step details here.' }); }
+  removeAdmissionStep(index: number): void { this.draft.admissionSteps.splice(index, 1); }
+  addAdmissionDocument(): void { this.draft.admissionDocuments.push('New required document'); }
+  removeAdmissionDocument(index: number): void { this.draft.admissionDocuments.splice(index, 1); }
+  addAdmissionClass(): void { this.draft.admissionClasses.push('New class'); }
+  removeAdmissionClass(index: number): void { this.draft.admissionClasses.splice(index, 1); }
   addAchiever(): void { this.draft.achievers.push({ name: 'New achiever', achievement: 'Add achievement details.', image: '' }); }
   removeAchiever(index: number): void { this.draft.achievers.splice(index, 1); }
   addCustomSection(): void { this.draft.customSections.push({ id: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`, navLabel: 'New section', kicker: 'Discover more', title: 'New custom section', body: 'Add your section content here.', image: '', enabled: true, showInNavigation: false, placement: 'before_admissions', theme: 'light' }); }
